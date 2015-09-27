@@ -53,8 +53,8 @@ CmdParser::readCmdInt(istream& istr)
                                resetBufAndPrintPrompt(); break;
          case ARROW_UP_KEY   : moveToHistory(_historyIdx - 1); break;
          case ARROW_DOWN_KEY : moveToHistory(_historyIdx + 1); break;
-         case ARROW_RIGHT_KEY: /* TODO */ break;
-         case ARROW_LEFT_KEY : /* TODO */ break;
+         case ARROW_RIGHT_KEY: moveBufPtr(_readBufPtr+1);/* TODO */ break;
+         case ARROW_LEFT_KEY : moveBufPtr(_readBufPtr-1);/* TODO */ break;
          case PG_UP_KEY      : moveToHistory(_historyIdx - PG_OFFSET); break;
          case PG_DOWN_KEY    : moveToHistory(_historyIdx + PG_OFFSET); break;
          case TAB_KEY        : /* TODO */ break;
@@ -86,6 +86,21 @@ bool
 CmdParser::moveBufPtr(char* const ptr)
 {
    // TODO...
+   // Status: Finished. Tried to make it beautiful.
+   if (ptr >= _readBuf && ptr <= _readBufEnd)
+   {
+        if (ptr <= _readBufPtr)
+            for (;_readBufPtr != ptr; _readBufPtr--)
+                cout << char(8);
+        else
+            for (;_readBufPtr != ptr; _readBufPtr++)
+                cout << *_readBufPtr;
+   }
+   else
+   {   // Reaching the end. Can't move cursor
+       mybeep();
+       return false;
+   }
    return true;
 }
 
@@ -135,7 +150,24 @@ void
 CmdParser::insertChar(char ch, int repeat)
 {
    // TODO...
+   // Current Status: Finished. Tried to make it beautiful.
    assert(repeat >= 1);
+   // shifting the remaing the string first and then insert characters
+   for (char* d = _readBufEnd; d != _readBufPtr-1; d--) *(d+repeat) = *d;
+   for (char* d = _readBufPtr; d != _readBufPtr+repeat; d++) *d = ch;
+
+   // Print the string with characters inserted
+   printf("%s", _readBufPtr);
+
+   // Locate the final position of cursor
+   char* dummy = _readBufPtr+repeat;
+
+   // Moving pointers
+   _readBufEnd += repeat;
+   _readBufPtr = _readBufEnd;
+
+   // Move cursor to its final position
+   moveBufPtr(dummy);
 }
 
 // 1. Delete the line that is currently shown on the screen
@@ -185,7 +217,7 @@ CmdParser::moveToHistory(int index)
 
 
 // This function adds the string in _readBuf to the _history.
-// The size of _history may or may not change. Depending on whether 
+// The size of _history may or may not change. Depending on whether
 // there is a temp history string.
 //
 // 1. Remove ' ' at the beginning and end of _readBuf
