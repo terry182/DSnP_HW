@@ -17,6 +17,7 @@ using namespace std;
 void mybeep();
 char mygetc(istream&);
 ParseChar getChar(istream&);
+string trim(string);
 
 
 //----------------------------------------------------------------------
@@ -57,7 +58,7 @@ CmdParser::readCmdInt(istream& istr)
          case ARROW_LEFT_KEY : moveBufPtr(_readBufPtr-1);/* TODO */ break;
          case PG_UP_KEY      : moveToHistory(_historyIdx - PG_OFFSET); break;
          case PG_DOWN_KEY    : moveToHistory(_historyIdx + PG_OFFSET); break;
-         case TAB_KEY        : /* TODO */ break;
+         case TAB_KEY        : deleteLine();/* TODO */ break;
          case INSERT_KEY     : // not yet supported; fall through to UNDEFINE
          case UNDEFINED_KEY:   mybeep(); break;
          default:  // printable character
@@ -203,6 +204,13 @@ void
 CmdParser::deleteLine()
 {
    // TODO...
+   // Status: Finished. Seems.
+    moveBufPtr(_readBuf);
+    // As _readBufEnd will decrease with deleteChar(),
+    // the cursor won't move in deleteChar(),
+    // Eventually, we will have _readBufEnd == _readBufPtr == _readBuf
+    while(_readBufEnd != _readBuf) deleteChar();
+    assert(*_readBufEnd == 0);
 }
 
 
@@ -228,6 +236,7 @@ void
 CmdParser::moveToHistory(int index)
 {
    // TODO...
+   // Status: need to be done.
 }
 
 
@@ -247,6 +256,10 @@ void
 CmdParser::addHistory()
 {
    // TODO...
+   // Status: Scheduled
+   string readBuf(_readBuf);
+   readBuf = trim(readBuf);
+    cout << "After: " << readBuf << "||"<< endl;
 }
 
 
@@ -263,3 +276,14 @@ CmdParser::retrieveHistory()
    cout << _readBuf;
    _readBufPtr = _readBufEnd = _readBuf + _history[_historyIdx].size();
 }
+
+// This function trim the whitespaces in the beginning
+// and the end of a string.
+string trim(string s)
+{   size_t f = s.find_first_not_of(' ');
+    if (f == string::npos) // Nonwhitespace character not found.
+        return string("");
+    size_t e = s.find_last_not_of(' ');
+    return s.substr(f, e-f+1);
+}
+
