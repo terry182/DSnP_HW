@@ -243,15 +243,11 @@ CmdParser::moveToHistory(int index)
            return ;
         }
         else if (_historyIdx == _history.size())
-        {   if (_tempCmdStored)
-            {   _history.pop_back();
-                _history.push_back(string(_readBuf));
-            }
-            else
-            { _history.push_back(string(_readBuf));
-              _tempCmdStored = true;
-            }
+        {   _history.push_back(string(_readBuf));
+            _tempCmdStored = true;
         }
+        else if (_tempCmdStored && _historyIdx == _history.size()-1)
+           _history[_historyIdx] = string(_readBuf);
         if (index < 0) index = 0;
    }
    else
