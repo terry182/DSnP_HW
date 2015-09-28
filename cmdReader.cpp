@@ -58,7 +58,7 @@ CmdParser::readCmdInt(istream& istr)
          case ARROW_LEFT_KEY : moveBufPtr(_readBufPtr-1);/* TODO */ break;
          case PG_UP_KEY      : moveToHistory(_historyIdx - PG_OFFSET); break;
          case PG_DOWN_KEY    : moveToHistory(_historyIdx + PG_OFFSET); break;
-         case TAB_KEY        : deleteLine();/* TODO */ break;
+         case TAB_KEY        :insertChar(' ', 8-(_readBufPtr - _readBuf)%8); break;
          case INSERT_KEY     : // not yet supported; fall through to UNDEFINE
          case UNDEFINED_KEY:   mybeep(); break;
          default:  // printable character
@@ -243,13 +243,19 @@ CmdParser::moveToHistory(int index)
            return ;
         }
         else if (_historyIdx == _history.size())
-        {   _history.push_back(string(_readBuf));
-            _tempCmdStored = true;
+        {   if (_tempCmdStored)
+            {   _history.pop_back();
+                _history.push_back(string(_readBuf));
+            }
+            else
+            { _history.push_back(string(_readBuf));
+              _tempCmdStored = true;
+            }
         }
         if (index < 0) index = 0;
    }
    else
-   {    if (_historyIdx == _history.size()-1)
+   {    if (_historyIdx >= _history.size()-1)
         {   mybeep();
             return ;
         }
