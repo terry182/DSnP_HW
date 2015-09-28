@@ -46,7 +46,7 @@ CmdParser::readCmdInt(istream& istr)
          case HOME_KEY       : moveBufPtr(_readBuf); break;
          case LINE_END_KEY   :
          case END_KEY        : moveBufPtr(_readBufEnd); break;
-         case BACK_SPACE_KEY : /* TODO */ break;
+         case BACK_SPACE_KEY : if(moveBufPtr(_readBufPtr-1)) deleteChar();/* TODO */ break;
          case DELETE_KEY     : deleteChar(); break;
          case NEWLINE_KEY    : addHistory();
                                cout << char(NEWLINE_KEY);
@@ -128,6 +128,21 @@ bool
 CmdParser::deleteChar()
 {
    // TODO...
+   // Status: Finished. Seems.
+   if (_readBufPtr == _readBufEnd)
+   {
+       mybeep();
+       return false;
+   }
+   for(char* d = _readBufPtr; d != _readBufEnd; d++) *d = *(d+1);
+   printf("%s ", _readBufPtr);
+
+   char* dummy = _readBufPtr;
+
+    _readBufPtr = _readBufEnd;
+    moveBufPtr(dummy);
+    _readBufEnd--;
+
    return true;
 }
 
