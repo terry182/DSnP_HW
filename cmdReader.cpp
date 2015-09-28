@@ -237,6 +237,29 @@ CmdParser::moveToHistory(int index)
 {
    // TODO...
    // Status: need to be done.
+   if (index < _historyIdx)
+   {    if (_historyIdx == 0)
+        {  mybeep();
+           return ;
+        }
+        else if (_historyIdx == _history.size())
+        {   _history.push_back(string(_readBuf));
+            _tempCmdStored = true;
+        }
+        if (index < 0) index = 0;
+   }
+   else
+   {    if (_historyIdx == _history.size()-1)
+        {   mybeep();
+            return ;
+        }
+        if (index >= _history.size()) index = _history.size() -1;
+   }
+   deleteLine();
+   strcpy(_readBuf, _history[index].c_str());
+   printf("%s", _readBuf);
+   _readBufPtr = _readBufEnd = _readBuf + _history[index].size();
+   _historyIdx = index;
 }
 
 
@@ -256,10 +279,15 @@ void
 CmdParser::addHistory()
 {
    // TODO...
-   // Status: Scheduled
+   // Status: Need to be test with moveToHistory()
    string readBuf(_readBuf);
    readBuf = trim(readBuf);
-    cout << "After: " << readBuf << "||"<< endl;
+   if (_tempCmdStored)
+   {    _history.pop_back();
+        _tempCmdStored = false;
+   }
+   if (!readBuf.empty()) _history.push_back(readBuf);
+   _historyIdx = _history.size();
 }
 
 
