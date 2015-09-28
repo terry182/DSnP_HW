@@ -236,7 +236,7 @@ void
 CmdParser::moveToHistory(int index)
 {
    // TODO...
-   // Status: need to be done.
+   // Status: Finished. Seems.
    if (index < _historyIdx)
    {    if (_historyIdx == 0)
         {  mybeep();
@@ -255,7 +255,7 @@ CmdParser::moveToHistory(int index)
         if (index < 0) index = 0;
    }
    else
-   {    if (_historyIdx >= _history.size()-1)
+   {    if (_history.empty() || _historyIdx >= _history.size()-1)
         {   mybeep();
             return ;
         }
