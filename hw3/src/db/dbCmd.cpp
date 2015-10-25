@@ -56,6 +56,15 @@ bool
 initDbCmd()
 {
    // TODO...
+   if (!(cmdMgr->regCmd("DBRead", 3, new DBReadCmd) &&
+         cmdMgr->regCmd("DBAVerage", 4, new DBAveCmd) &&
+         cmdMgr->regCmd("DBCount", 3, new DBCountCmd) &&
+         cmdMgr->regCmd("DBSum", 3, new DBSumCmd) &&
+         cmdMgr->regCmd("DBSort", 3, new DBSortCmd)
+      )) {
+      cerr << "Registering \"db\" commands fails... exiting" << endl;
+      return false;
+   }
    return true;
 }
 
@@ -66,7 +75,42 @@ CmdExecStatus
 DBAppendCmd::exec(const string& option)
 {
    // TODO...
+   vector<string> options;
+   if (!dbtbl) {
+      cerr << "Error: Table is not yet created!!" << endl;
+      return CMD_EXEC_DONE;
+   }
    // check option
+   if (!CmdExec::lexOptions(option, options))
+      return CMD_EXEC_ERROR;
+
+   if (options.empty())
+      return CmdExec::errorOption(CMD_OPT_MISSING, "");
+
+   if (options.size() == 1)
+   {    errorOption(CMD_OPT_MISSING, options[0]);
+   }
+
+   if (!myStrNCmp("-Row", options[0], 2))
+   {    DBRow tmp;
+        for (int i = 1; i < options.size(); ++i)
+        {   int c;
+            if (i == dbtbl.nCols()+1) return CMD_EXEC_DONE;
+
+            if (options[i] == "-")
+                tmp.addData(INT_MAX);
+            else if (!myStr2Int(options[i], c))
+            {
+                cerr << "Error: " << token << " is not a number!!\n";
+                return CMD_EXEC_ERROR;
+            }
+        }
+        for (int i = tmp.size(); i < dbtbl.nCols(); ++i)
+            tmp.addData(INT_MAX);
+        dbtbl.addRow(tmp);
+   }
+   else if (!myStrNCmp("-Column", options[0], 2))
+   else return CmdExec::errorOption(CMD_OPT_ILLEGAL, options[0]);
 
    return CMD_EXEC_DONE;
 }
@@ -90,7 +134,7 @@ DBAppendCmd::help() const
 //----------------------------------------------------------------------
 CmdExecStatus
 DBAveCmd::exec(const string& option)
-{  
+{
    // check option
    string token;
    if (!CmdExec::lexSingleOption(option, token, false))
@@ -109,7 +153,7 @@ DBAveCmd::exec(const string& option)
 
 void
 DBAveCmd::usage(ostream& os) const
-{     
+{
    os << "Usage: DBAVerage <(int colIdx)>" << endl;
 }
 
@@ -126,12 +170,13 @@ DBAveCmd::help() const
 //----------------------------------------------------------------------
 CmdExecStatus
 DBCountCmd::exec(const string& option)
-{  
+{
    // check option
    string token;
    if (!CmdExec::lexSingleOption(option, token, false))
       return CMD_EXEC_ERROR;
    int c;
+   cout << "Option " << option << endl;
    if (!checkColIdx(option, c)) return CMD_EXEC_ERROR;
 
    int n = dbtbl.getCount(c);
@@ -142,7 +187,7 @@ DBCountCmd::exec(const string& option)
 
 void
 DBCountCmd::usage(ostream& os) const
-{     
+{
    os << "Usage: DBCount <(int colIdx)>" << endl;
 }
 
@@ -202,7 +247,7 @@ DBDelCmd::help() const
 //----------------------------------------------------------------------
 CmdExecStatus
 DBMaxCmd::exec(const string& option)
-{  
+{
    // check option
    string token;
    if (!CmdExec::lexSingleOption(option, token, false))
@@ -218,7 +263,7 @@ DBMaxCmd::exec(const string& option)
 
 void
 DBMaxCmd::usage(ostream& os) const
-{     
+{
    os << "Usage: DBMAx <(int colIdx)>" << endl;
 }
 
@@ -235,7 +280,7 @@ DBMaxCmd::help() const
 //----------------------------------------------------------------------
 CmdExecStatus
 DBMinCmd::exec(const string& option)
-{  
+{
    // check option
    string token;
    if (!CmdExec::lexSingleOption(option, token, false))
@@ -251,7 +296,7 @@ DBMinCmd::exec(const string& option)
 
 void
 DBMinCmd::usage(ostream& os) const
-{     
+{
    os << "Usage: DBMIn <(int colIdx)>" << endl;
 }
 
@@ -269,8 +314,15 @@ DBMinCmd::help() const
 //----------------------------------------------------------------------
 CmdExecStatus
 DBPrintCmd::exec(const string& option)
-{  
+{
    // TODO...
+   vector<string> options;
+   if (!CmdExec::lexOptions(option, options))
+      return CMD_EXEC_ERROR;
+
+   if (options.empty())
+   vector<string> options;
+   lexOptions(option, options);
 
    return CMD_EXEC_DONE;
 }
@@ -363,7 +415,7 @@ DBSortCmd::exec(const string& option)
    vector<string> options;
    if (!CmdExec::lexOptions(option, options))
       return CMD_EXEC_ERROR;
-   
+
    if (options.empty())
       return CmdExec::errorOption(CMD_OPT_MISSING, "");
 
@@ -397,7 +449,7 @@ DBSortCmd::help() const
 //----------------------------------------------------------------------
 CmdExecStatus
 DBSumCmd::exec(const string& option)
-{  
+{
    // check option
    string token;
    if (!CmdExec::lexSingleOption(option, token, false))
@@ -413,7 +465,7 @@ DBSumCmd::exec(const string& option)
 
 void
 DBSumCmd::usage(ostream& os) const
-{     
+{
    os << "Usage: DBSUm <(int colIdx)>" << endl;
 }
 

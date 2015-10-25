@@ -26,32 +26,27 @@ void mybeep();
 //----------------------------------------------------------------------
 // return false if file cannot be opened
 // Please refer to the comments in "DofileCmd::exec", cmdCommon.cpp
-    bool
-CmdParser::openDofile(const string& dof)
+bool CmdParser::openDofile(const string& dof)
 {
     // TODO...
+    if (_dofileStack.size() == 1024) { cerr << "Error: dofile stack overflow (" << _dofileStack.size() << ")" << endl; return false; }
     _dofile = new ifstream(dof.c_str());
 
     if (!_dofile->is_open()) {
-        if (_dofileStack.size() > 1024)  cerr << "Error: dofile stack overflow (" << _dofileStack.size() << ")" << endl;
 
         _dofile = 0;
         return false;
     }
-
     else _dofileStack.push(_dofile);
 
     return true;
 }
 
 // Must make sure _dofile != 0
-    void
-CmdParser::closeDofile()
+void CmdParser::closeDofile()
 {
     assert(_dofile != 0);
     // TODO...
-
-
     if (*_dofile) _dofile->close();
 
     delete _dofile;
@@ -93,8 +88,7 @@ CmdParser::regCmd(const string& cmd, unsigned nCmp, CmdExec* e)
 }
 
 // Return false on "quit" or if excetion happens
-    CmdExecStatus
-CmdParser::execOneCmd()
+CmdExecStatus CmdParser::execOneCmd()
 {
     bool newCmd = false;
     if (_dofile != 0)
@@ -154,13 +148,13 @@ CmdParser::printHistory(int nPrint) const
 // 3. Get the command options from the trailing part of str (i.e. second
 //    words and beyond) and store them in "option"
 //
-    CmdExec*
-CmdParser::parseCmd(string& option)
+CmdExec* CmdParser::parseCmd(string& option)
 {
     assert(_tempCmdStored == false);
     assert(!_history.empty());
     string str = _history.back();
 
+    assert(str[0] != 0 && str[0] != ' ');
     // TODO...
     string cmd;
     size_t tail = myStrGetTok(str, cmd);
@@ -169,7 +163,6 @@ CmdParser::parseCmd(string& option)
     if (!e) cerr << "Illegal command!! (" << cmd << ")" << endl;
     else if (tail != string::npos) option = str.substr(tail, str.length()-tail);
 
-    assert(str[0] != 0 && str[0] != ' ');
     return e;
 }
 
@@ -251,8 +244,7 @@ CmdParser::listCmd(const string& str)
 //    ==> Checked by the CmdExec::checkOptCmd(const string&) function
 // 3. All string comparison are "case-insensitive".
 //
-    CmdExec*
-CmdParser::getCmd(string cmd)
+CmdExec* CmdParser::getCmd(string cmd)
 {
     CmdExec* e = 0;
     // TODO...
