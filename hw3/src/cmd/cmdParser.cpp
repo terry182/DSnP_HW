@@ -4,11 +4,12 @@
   Synopsis     [ Define command parsing member functions for class CmdParser ]
   Author       [ Chung-Yang (Ric) Huang ]
   Copyright    [ Copyleft(c) 2007-present LaDs(III), GIEE, NTU, Taiwan ]
-****************************************************************************/
+ ****************************************************************************/
 #include <cassert>
 #include <iostream>
 #include <iomanip>
 #include <cstdlib>
+#include <sstream>
 #include "util.h"
 #include "cmdParser.h"
 
@@ -25,71 +26,90 @@ void mybeep();
 //----------------------------------------------------------------------
 // return false if file cannot be opened
 // Please refer to the comments in "DofileCmd::exec", cmdCommon.cpp
-bool
+    bool
 CmdParser::openDofile(const string& dof)
 {
-   // TODO...
-   _dofile = new ifstream(dof.c_str());
-   return true;
+    // TODO...
+    _dofile = new ifstream(dof.c_str());
+
+    if (!_dofile->is_open()) {
+        if (_dofileStack.size() > 1024)  cerr << "Error: dofile stack overflow (" << _dofileStack.size() << ")" << endl;
+
+        _dofile = 0;
+        return false;
+    }
+
+    else _dofileStack.push(_dofile);
+
+    return true;
 }
 
 // Must make sure _dofile != 0
-void
+    void
 CmdParser::closeDofile()
 {
-   assert(_dofile != 0);
-   // TODO...
-   delete _dofile;
+    assert(_dofile != 0);
+    // TODO...
+
+
+    if (*_dofile) _dofile->close();
+
+    delete _dofile;
+
+    _dofileStack.pop();
+
+    if (!_dofileStack.empty()) _dofile = _dofileStack.top();
+    else _dofile = 0;
 }
 
 // Return false if registration fails
-bool
+    bool
 CmdParser::regCmd(const string& cmd, unsigned nCmp, CmdExec* e)
 {
-   // Make sure cmd hasn't been registered and won't cause ambiguity
-   string str = cmd;
-   unsigned s = str.size();
-   if (s < nCmp) return false;
-   while (true) {
-      if (getCmd(str)) return false;
-      if (s == nCmp) break;
-      str.resize(--s);
-   }
+    // Make sure cmd hasn't been registered and won't cause ambiguity
+    string str = cmd;
+    unsigned s = str.size();
+    if (s < nCmp) return false;
+    while (true) {
+        if (getCmd(str)) return false;
+        if (s == nCmp) break;
+        str.resize(--s);
+    }
 
-   // Change the first nCmp characters to upper case to facilitate
-   //    case-insensitive comparison later.
-   // The strings stored in _cmdMap are all upper case
-   //
-   assert(str.size() == nCmp);  // str is now mandCmd
-   string& mandCmd = str;
-   for (unsigned i = 0; i < nCmp; ++i)
-      mandCmd[i] = toupper(mandCmd[i]);
-   string optCmd = cmd.substr(nCmp);
-   assert(e != 0);
-   e->setOptCmd(optCmd);
+    // Change the first nCmp characters to upper case to facilitate
+    //    case-insensitive comparison later.
+    // The strings stored in _cmdMap are all upper case
+    //
+    assert(str.size() == nCmp);  // str is now mandCmd
+    string& mandCmd = str;
+    for (unsigned i = 0; i < nCmp; ++i)
+        mandCmd[i] = toupper(mandCmd[i]);
+    string optCmd = cmd.substr(nCmp);
+    assert(e != 0);
+    e->setOptCmd(optCmd);
 
-   // insert (mandCmd, e) to _cmdMap; return false if insertion fails.
-   return (_cmdMap.insert(CmdRegPair(mandCmd, e))).second;
+    // insert (mandCmd, e) to _cmdMap; return false if insertion fails.
+    return (_cmdMap.insert(CmdRegPair(mandCmd, e))).second;
 }
 
 // Return false on "quit" or if excetion happens
-CmdExecStatus
+    CmdExecStatus
 CmdParser::execOneCmd()
 {
-   bool newCmd = false;
-   if (_dofile != 0)
-      newCmd = readCmd(*_dofile);
-   else
-      newCmd = readCmd(cin);
+    bool newCmd = false;
+    if (_dofile != 0)
+        newCmd = readCmd(*_dofile);
+    else
+        newCmd = readCmd(cin);
 
-   // execute the command
-   if (newCmd) {
-      string option;
-      CmdExec* e = parseCmd(option);
-      if (e != 0)
-         return e->exec(option);
-   }
-   return CMD_EXEC_NOP;
+    // execute the command
+    if (newCmd) {
+        string option;
+        CmdExec* e = parseCmd(option);
+        if (e != 0)
+            return e->exec(option);
+    }
+    return CMD_EXEC_NOP;
 }
 
 // For each CmdExec* in _cmdMap, call its "help()" to print out the help msg.
@@ -97,22 +117,25 @@ CmdParser::execOneCmd()
 void
 CmdParser::printHelps() const
 {
-   // TODO...
+    // TODO...
+
+    for (CmdMap::const_iterator _it = _cmdMap.begin(); _it != _cmdMap.end(); ++_it)
+        _it->second->help();
 }
 
 void
 CmdParser::printHistory(int nPrint) const
 {
-   assert(_tempCmdStored == false);
-   if (_history.empty()) {
-      cout << "Empty command history!!" << endl;
-      return;
-   }
-   int s = _history.size();
-   if ((nPrint < 0) || (nPrint > s))
-      nPrint = s;
-   for (int i = s - nPrint; i < s; ++i)
-      cout << "   " << i << ": " << _history[i] << endl;
+    assert(_tempCmdStored == false);
+    if (_history.empty()) {
+        cout << "Empty command history!!" << endl;
+        return;
+    }
+    int s = _history.size();
+    if ((nPrint < 0) || (nPrint > s))
+        nPrint = s;
+    for (int i = s - nPrint; i < s; ++i)
+        cout << "   " << i << ": " << _history[i] << endl;
 }
 
 
@@ -131,21 +154,28 @@ CmdParser::printHistory(int nPrint) const
 // 3. Get the command options from the trailing part of str (i.e. second
 //    words and beyond) and store them in "option"
 //
-CmdExec*
+    CmdExec*
 CmdParser::parseCmd(string& option)
 {
-   assert(_tempCmdStored == false);
-   assert(!_history.empty());
-   string str = _history.back();
+    assert(_tempCmdStored == false);
+    assert(!_history.empty());
+    string str = _history.back();
 
-   // TODO...
-   assert(str[0] != 0 && str[0] != ' ');
-   return NULL;
+    // TODO...
+    string cmd;
+    size_t tail = myStrGetTok(str, cmd);
+    CmdExec* e = getCmd(cmd);
+
+    if (!e) cerr << "Illegal command!! (" << cmd << ")" << endl;
+    else if (tail != string::npos) option = str.substr(tail, str.length()-tail);
+
+    assert(str[0] != 0 && str[0] != ' ');
+    return e;
 }
 
 // This function is called by pressing 'Tab'.
 // It is to list the partially matched commands.
-// "str" is the partial string before current cursor position. It can be 
+// "str" is the partial string before current cursor position. It can be
 // a null string, or begin with ' '. The beginning ' ' will be ignored.
 //
 // Several possibilities after pressing 'Tab'
@@ -203,10 +233,10 @@ CmdParser::parseCmd(string& option)
 //    [After Tab]
 //    ==> Beep and stay in the same location
 //
-void
+    void
 CmdParser::listCmd(const string& str)
 {
-   // TODO...
+    // TODO...
 }
 
 // cmd is a copy of the original input
@@ -221,12 +251,19 @@ CmdParser::listCmd(const string& str)
 //    ==> Checked by the CmdExec::checkOptCmd(const string&) function
 // 3. All string comparison are "case-insensitive".
 //
-CmdExec*
+    CmdExec*
 CmdParser::getCmd(string cmd)
 {
-   CmdExec* e = 0;
-   // TODO...
-   return e;
+    CmdExec* e = 0;
+    // TODO...
+    for (CmdMap::iterator it = _cmdMap.begin(); it != _cmdMap.end(); ++it)
+    {
+        if (myStrNCmp(it->first+it->second->getOptCmd(), cmd, it->first.length()) == 0)
+        {    e = it->second;
+             break;
+        }
+    }
+    return e;
 }
 
 
@@ -241,18 +278,18 @@ bool
 CmdExec::lexSingleOption
 (const string& option, string& token, bool optional) const
 {
-   size_t n = myStrGetTok(option, token);
-   if (!optional) {
-      if (token.size() == 0) {
-         errorOption(CMD_OPT_MISSING, "");
-         return false;
-      }
-   }
-   if (n != string::npos) {
-      errorOption(CMD_OPT_EXTRA, option.substr(n));
-      return false;
-   }
-   return true;
+    size_t n = myStrGetTok(option, token);
+    if (!optional) {
+        if (token.size() == 0) {
+            errorOption(CMD_OPT_MISSING, "");
+            return false;
+        }
+    }
+    if (n != string::npos) {
+        errorOption(CMD_OPT_EXTRA, option.substr(n));
+        return false;
+    }
+    return true;
 }
 
 // if nOpts is specified (!= 0), the number of tokens must be exactly = nOpts
@@ -262,47 +299,47 @@ bool
 CmdExec::lexOptions
 (const string& option, vector<string>& tokens, size_t nOpts) const
 {
-   string token;
-   size_t n = myStrGetTok(option, token);
-   while (token.size()) {
-      tokens.push_back(token);
-      n = myStrGetTok(option, token, n);
-   }
-   if (nOpts != 0) {
-      if (tokens.size() < nOpts) {
-         errorOption(CMD_OPT_MISSING, "");
-         return false;
-      }
-      if (tokens.size() > nOpts) {
-         errorOption(CMD_OPT_EXTRA, tokens[nOpts]);
-         return false;
-      }
-   }
-   return true;
+    string token;
+    size_t n = myStrGetTok(option, token);
+    while (token.size()) {
+        tokens.push_back(token);
+        n = myStrGetTok(option, token, n);
+    }
+    if (nOpts != 0) {
+        if (tokens.size() < nOpts) {
+            errorOption(CMD_OPT_MISSING, "");
+            return false;
+        }
+        if (tokens.size() > nOpts) {
+            errorOption(CMD_OPT_EXTRA, tokens[nOpts]);
+            return false;
+        }
+    }
+    return true;
 }
 
 CmdExecStatus
 CmdExec::errorOption(CmdOptionError err, const string& opt) const
 {
-   switch (err) {
-      case CMD_OPT_MISSING:
-         cerr << "Error: Missing option";
-         if (opt.size()) cerr << " after (" << opt << ")";
-         cerr << "!!" << endl;
-      break;
-      case CMD_OPT_EXTRA:
-         cerr << "Error: Extra option!! (" << opt << ")" << endl;
-      break;
-      case CMD_OPT_ILLEGAL:
-         cerr << "Error: Illegal option!! (" << opt << ")" << endl;
-      break;
-      case CMD_OPT_FOPEN_FAIL:
-         cerr << "Error: cannot open file \"" << opt << "\"!!" << endl;
-      break;
-      default:
-         cerr << "Error: Unknown option error type!! (" << err << ")" << endl;
-      exit(-1);
-   }
-   return CMD_EXEC_ERROR;
+    switch (err) {
+        case CMD_OPT_MISSING:
+            cerr << "Error: Missing option";
+            if (opt.size()) cerr << " after (" << opt << ")";
+            cerr << "!!" << endl;
+            break;
+        case CMD_OPT_EXTRA:
+            cerr << "Error: Extra option!! (" << opt << ")" << endl;
+            break;
+        case CMD_OPT_ILLEGAL:
+            cerr << "Error: Illegal option!! (" << opt << ")" << endl;
+            break;
+        case CMD_OPT_FOPEN_FAIL:
+            cerr << "Error: cannot open file \"" << opt << "\"!!" << endl;
+            break;
+        default:
+            cerr << "Error: Unknown option error type!! (" << err << ")" << endl;
+            exit(-1);
+    }
+    return CMD_EXEC_ERROR;
 }
 
