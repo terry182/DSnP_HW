@@ -33,11 +33,11 @@ ostream& operator << (ostream& os, const DBTable& t)
 {
     // TODO: to print out a table
     // - Data are seperated by setw(6) and aligned right.
-    // - Null cells should be left blank (printed as ' ').
+    // - Null cells should be left blank (printed as '.').
     for (int i = 0; i < t.nRows(); ++i)
     {    for (int j = 0; j < t.nCols(); ++j)
-        {   if (j) cout << setw(6);
-            if (t[i][j] == INT_MAX) cout << ' ';
+        {   cout << right << setw(6);
+            if (t[i][j] == INT_MAX) cout << '.';
             else cout << t[i][j];
         }
         cout << endl;
@@ -101,8 +101,8 @@ DBSort::operator() (const DBRow& r1, const DBRow& r2) const
     // TODO: called as a functional object that compares the data in r1 and r2
     //       based on the order defined in _sortOrder
     for (int i = 0; i < _sortOrder.size(); ++i)
-        if (r1[i] < r2[i]) return true;
-        else if (r1[i] > r2[i]) return false;
+        if (r1[_sortOrder[i]] < r2[_sortOrder[i]]) return true;
+        else if (r1[_sortOrder[i]] > r2[_sortOrder[i]]) return false;
 
     return false;
 }
@@ -229,7 +229,10 @@ DBTable::printCol(size_t c) const
     // - Data are seperated by a space. No trailing space at the end.
     // - Null cells are printed as '.'
     for (int i = 0; i < _table.size(); ++i)
-        cout << (i ? " ": "") << (_table[i][c] == INT_MAX? '.' : _table[i][c]);
+    {   cout << (i ? " ": "");
+        if (_table[i][c] == INT_MAX) cout << '.';
+        else cout <<  _table[i][c];
+    }
 }
 
 void

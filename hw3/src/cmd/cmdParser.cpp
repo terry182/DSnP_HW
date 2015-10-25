@@ -34,7 +34,8 @@ bool CmdParser::openDofile(const string& dof)
 
     if (!_dofile->is_open()) {
 
-        _dofile = 0;
+        if (!_dofileStack.empty()) _dofile = _dofileStack.top();
+        else _dofile = 0;
         return false;
     }
     else _dofileStack.push(_dofile);
@@ -58,8 +59,7 @@ void CmdParser::closeDofile()
 }
 
 // Return false if registration fails
-    bool
-CmdParser::regCmd(const string& cmd, unsigned nCmp, CmdExec* e)
+bool CmdParser::regCmd(const string& cmd, unsigned nCmp, CmdExec* e)
 {
     // Make sure cmd hasn't been registered and won't cause ambiguity
     string str = cmd;
@@ -161,7 +161,7 @@ CmdExec* CmdParser::parseCmd(string& option)
     CmdExec* e = getCmd(cmd);
 
     if (!e) cerr << "Illegal command!! (" << cmd << ")" << endl;
-    else if (tail != string::npos) option = str.substr(tail, str.length()-tail);
+    else if (tail != string::npos) option = str.substr(tail+1, str.length()-tail-1);
 
     return e;
 }
@@ -252,7 +252,7 @@ CmdExec* CmdParser::getCmd(string cmd)
     {
         if (myStrNCmp(it->first+it->second->getOptCmd(), cmd, it->first.length()) == 0)
         {    e = it->second;
-             break;
+            break;
         }
     }
     return e;
