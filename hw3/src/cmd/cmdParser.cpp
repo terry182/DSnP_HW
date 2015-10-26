@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <cstdlib>
 #include <sstream>
+#include <cctype>
 #include "util.h"
 #include "cmdParser.h"
 
@@ -115,6 +116,7 @@ CmdParser::printHelps() const
 
     for (CmdMap::const_iterator _it = _cmdMap.begin(); _it != _cmdMap.end(); ++_it)
         _it->second->help();
+    cout << endl;
 }
 
 void
@@ -226,10 +228,80 @@ CmdExec* CmdParser::parseCmd(string& option)
 //    [After Tab]
 //    ==> Beep and stay in the same location
 //
-    void
-CmdParser::listCmd(const string& str)
+
+void CmdParser::listCmd(const string& str)
 {
     // TODO...
+    if (str.find_first_not_of(' ') == string::npos)
+    {   int cnt = 0;
+        for (CmdMap::iterator it = _cmdMap.begin(); it != _cmdMap.end(); ++it, ++cnt)
+        {   if (cnt % 5 == 0) cout << endl;
+            cout << setw(12) << left << it->first+it->second->getOptCmd();
+        }
+        reprintCmd();
+    }
+    else if (str.find_first_of(' ') == string::npos)
+    {  int cnt = 0;
+       for (CmdMap::iterator it = _cmdMap.begin(); it != _cmdMap.end(); ++it)
+       {    string tmp = it->first + it->second->getOptCmd();
+            bool flag = true;
+            for (int i = 0; i < tmp.length() && i < str.length(); ++i)
+                if (toupper(tmp[i]) != toupper(str[i]))
+                {  flag = false; break; }
+            if (flag) cnt++;
+       }
+
+        if (cnt > 1)
+        {    int _cnt = 0;
+             cout << endl;
+             for (CmdMap::iterator it = _cmdMap.begin(); it != _cmdMap.end(); ++it)
+             {    string tmp = it->first + it->second->getOptCmd();
+                   bool flag = true;
+                   for (int i = 0; i < tmp.length() && i < str.length(); ++i)
+                       if (toupper(tmp[i]) != toupper(str[i]))
+                       {  flag = false; break; }
+
+                   if (flag)
+                   {
+                     ++_cnt;
+                     if (_cnt % 5 == 0) cout << endl;
+                    cout << setw(12) << left << it->first+it->second->getOptCmd();
+                   }
+              }
+              reprintCmd();
+        }
+        else if (cnt)
+        {   for (CmdMap::iterator it = _cmdMap.begin(); it != _cmdMap.end(); ++it)
+            {    string tmp = it->first + it->second->getOptCmd();
+                  bool flag = true;
+                  for (int i = 0; i < tmp.length() && i < str.length(); ++i)
+                      if (toupper(tmp[i]) != toupper(str[i]))
+                          {  flag = false; break; }
+                 if (flag) {
+                   for (int i = str.length(); i < tmp.length(); i++)
+                        insertChar(tmp[i]);
+                    insertChar(' ');
+                    break;
+                 }
+            }
+        }
+        else mybeep();
+    }
+    else
+    {   string _str = str.substr(0, str.find_first_of(' '));
+        bool flag = false;
+        for (CmdMap::iterator it = _cmdMap.begin(); it != _cmdMap.end(); ++it)
+        {   string tmp = it->first + it->second->getOptCmd();
+            if (!myStrNCmp(it->first+it->second->getOptCmd(), _str, it->first.length()))
+            {   flag = true;
+                cout << endl;
+                it->second->usage(cout);
+                reprintCmd();
+                break;
+            }
+        }
+      if (!flag) mybeep();
+    }
 }
 
 // cmd is a copy of the original input
@@ -334,4 +406,3 @@ CmdExec::errorOption(CmdOptionError err, const string& opt) const
     }
     return CMD_EXEC_ERROR;
 }
-

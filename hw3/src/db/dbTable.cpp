@@ -46,7 +46,7 @@ ostream& operator << (ostream& os, const DBTable& t)
     return os;
 }
 
-int dbStr2Int(const string& str)
+inline int dbStr2Int(const string& str)
 {
     if (str == "") return INT_MAX;
     int i = (str[0] == '-');
@@ -245,4 +245,3 @@ DBTable::printSummary() const
     cout << "(#rows, #cols, #data) = (" << nr << ", " << nc << ", "
         << nv << ")" << endl;
 }
-
