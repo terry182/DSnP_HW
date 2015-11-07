@@ -36,7 +36,7 @@ public:                                                                     \
 private:                                                                    \
    static MemMgr<T>* const _memMgr
 
-// You should use the following two MACROs whenever possible to 
+// You should use the following two MACROs whenever possible to
 // make your code 64/32-bit platform independent.
 // DO NOT use 4 or 8 for sizeof(size_t) in your code
 //
@@ -45,13 +45,13 @@ private:                                                                    \
 
 // TODO: Define them by SIZE_T and/or SIZE_T_1 MACROs.
 //
-// To promote 't' to the nearest multiple of SIZE_T; 
+// To promote 't' to the nearest multiple of SIZE_T;
 // e.g. Let SIZE_T = 8;  toSizeT(7) = 8, toSizeT(12) = 16
-#define toSizeT(t)      0  // TODO
+#define toSizeT(t)      ((t % SIZE_T) ?  t + (SIZE_T - t % SIZE_T) : t) // TODO
 //
 // To demote 't' to the nearest multiple of SIZE_T
 // e.g. Let SIZE_T = 8;  downtoSizeT(9) = 8, downtoSizeT(100) = 96
-#define downtoSizeT(t)  0  // TODO
+#define downtoSizeT(t)  (t - t % SIZE_T) // TODO
 
 // R_SIZE is the size of the recycle list
 #define R_SIZE 256
@@ -89,10 +89,13 @@ class MemBlock
    // 4. Return false if not enough memory
    bool getMem(size_t t, T*& ret) {
       // TODO
+      if (getRemainSize() < t) return false;
+      ret = _ptr;
+      _ptr += t;
       return true;
    }
    size_t getRemainSize() const { return size_t(_end - _ptr); }
-      
+
    MemBlock<T>* getNextBlock() const { return _nextBlock; }
 
    // Data members
@@ -121,25 +124,32 @@ class MemRecycleList
    void setNextList(MemRecycleList<T>* l) { _nextList = l; }
    // pop out the first element in the recycle list
    T* popFront() {
-      // TODO
-      return 0;
+      // TODO Status: DONE.
+      if (!_first) return;
+      T* ans = _first;
+       _first = *((T**)(_first))
+      return ans;
    }
    // push the element 'p' to the beginning of the recycle list
    void  pushFront(T* p) {
-      // TODO
+      // TODO Status: DONE.
+      *((T**)p) = _first;
+      _first = p;
    }
    // Release the memory occupied by the recycle list(s)
    // DO NOT release the memory occupied by MemMgr/MemBlock
    void reset() {
-      // TODO
+      // TODO Status: DONE.
+      _first = 0;
    }
 
    // Helper functions
    // ----------------
    // Iterate to the next element after 'p' in the recycle list
    T* getNext(T* p) const {
-      // TODO
-      return 0;
+      // TODO Status: DONE.
+      if(!p) return 0;
+      return *((T**)p);
    }
    //
    // count the number of elements in the recycle list
@@ -281,8 +291,18 @@ private:
    //         by the MTNew command, not MTDelete.
    MemRecycleList<T>* getMemRecycleList(size_t n) {
       size_t m = n % R_SIZE;
-      // TODO
-      return 0;
+      // TODO Status:DONE
+      MemRecycleList<T>* p = _recycleList + m;
+      while (p->_nextList != 0)
+      {
+          if (p->_arrSize == n) break;
+          p = p->_nextList;
+      }
+      if (p->_arrSize != n)
+      {  p->_nextList = new MemRecycleList(n)
+         p = p->_nextList;
+      }
+      return p;
    }
    // t is the #Bytes requested from new or new[]
    // Note: Make sure the returned memory is a multiple of SIZE_T
