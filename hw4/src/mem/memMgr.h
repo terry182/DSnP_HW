@@ -89,7 +89,7 @@ class MemBlock
    // 4. Return false if not enough memory
    bool getMem(size_t t, T*& ret) {
       // TODO Status: DONE.
-      ret = _ptr;
+      ret = (T*)_ptr;
       if (getRemainSize() < t) return false;
       _ptr += t;
       return true;
@@ -378,8 +378,9 @@ private:
             #ifdef MEM_DEBUG
                 cout << "Recycling " << ret << " to _recycleList[" << rn << "]\n";
             #endif // MEM_DEBUG
+              getMemRecycleList(rn)->pushFront(ret);
 
-            _activeBlock = new MemBlock(_activeBlock, b);
+            _activeBlock = new MemBlock<T>(_activeBlock, _blockSize);
 
             #ifdef MEM_DEBUG
                 cout << "New MemBlock... " << _activeBlock << endl;
