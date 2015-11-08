@@ -56,7 +56,7 @@ public:
    // Allocate "n" number of MemTestObj elements
    void newObjs(size_t n) {
       // TODO Status: DONE.
-       for (int i = 0; i < n; ++i) _objList.push_back(new MemTestObj());
+       for (int i = 0; i < n; ++i) _objList.push_back(new MemTestObj);
    }
    // Allocate "n" number of MemTestObj arrays with size "s"
    void newArrs(size_t n, size_t s) {

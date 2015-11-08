@@ -89,8 +89,9 @@ class MemBlock
    // 4. Return false if not enough memory
    bool getMem(size_t t, T*& ret) {
       // TODO Status: DONE.
+      t = toSizeT(t);
       ret = (T*)_ptr;
-      if (getRemainSize() < t) return false;
+    if (getRemainSize() < t) return false;
       _ptr += t;
       return true;
    }
@@ -202,6 +203,7 @@ public:
           delete _activeBlock;
           _activeBlock = _activeBlock->_nextBlock;
       }
+      _activeBlock->reset();
       for (int i = 0; i < R_SIZE; ++i)
       {    MemRecycleList<T>* p = _recycleList + i;
           while (p)
@@ -213,6 +215,7 @@ public:
       if (b && b != _blockSize)
       {     delete _activeBlock;
             _activeBlock = new MemBlock<T>(0, b);
+            _blockSize = b;
       }
    }
    // Called by new
@@ -246,13 +249,13 @@ public:
       // TODO Status: DONE.
       // Get the array size 'n' stored by system,
       // which is also the _recycleList index
-      size_t n = *((size_t*)(p) - 1);
+      size_t n = *((size_t*)p);
       #ifdef MEM_DEBUG
       cout << ">> Array size = " << n << endl;
       cout << "Recycling " << p << " to _recycleList[" << n << "]" << endl;
       #endif // MEM_DEBUG
       // add to recycle list...
-      getMemRecycleList(n % R_SIZE)->pushFront(p);
+      getMemRecycleList(n)->pushFront(p);
    }
    void print() const {
       cout << "=========================================" << endl
@@ -362,7 +365,7 @@ private:
       if (t > _blockSize)
       {   cerr << "Requested memory (" << t << ") is greater than block size"
                << "(" << _blockSize << "). " << "Exception raised...\n";
-          throw bad_alloc();
+           throw bad_alloc();
       }
       size_t n = getArraySize(t);
       ret = getMemRecycleList(n)->popFront();
@@ -374,11 +377,13 @@ private:
       }
       else
       {   if (_activeBlock->getMem(t, ret) == false)
-          {   size_t rn = getArraySize(downtoSizeT(_activeBlock->getRemainSize()));
+          {   size_t rn = downtoSizeT(_activeBlock->getRemainSize());
+              if (rn >= S){ rn = getArraySize(rn);
             #ifdef MEM_DEBUG
                 cout << "Recycling " << ret << " to _recycleList[" << rn << "]\n";
             #endif // MEM_DEBUG
               getMemRecycleList(rn)->pushFront(ret);
+            }
 
             _activeBlock = new MemBlock<T>(_activeBlock, _blockSize);
 
