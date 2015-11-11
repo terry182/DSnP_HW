@@ -1,0 +1,5 @@
+./run > out.txt 2>&1
+
+./run-ref > out-ref.txt 2>&1
+
+vimdiff out.txt out-ref.txt

@@ -155,7 +155,8 @@ MTDeleteCmd::exec(const string& option)
         {   if (Array) return CmdExec::errorOption(CMD_OPT_EXTRA, options[i]);
             Array = true;
         }
-        else return CmdExec::errorOption(CMD_OPT_EXTRA, options[i]);
+        else if (Index | Random) return CmdExec::errorOption(CMD_OPT_EXTRA, options[i]);
+        else return CmdExec::errorOption(CMD_OPT_ILLEGAL, options[i]);
     }
 
     if (!Random && !Index) return CmdExec::errorOption(CMD_OPT_MISSING, "");
