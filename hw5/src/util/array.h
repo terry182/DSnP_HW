@@ -34,33 +34,33 @@ public:
       ~iterator() {} // Should NOT delete _node
 
       // TODO: implement these overloaded operators
-      const T& operator * () const { return (*this); }
+      const T& operator * () const { return (*_node); }
       T& operator * () { return (*_node); }
-      iterator& operator ++ () { return (*this); }
-      iterator operator ++ (int) { return (*this); }
-      iterator& operator -- () { return (*this); }
-      iterator operator -- (int) { return (*this); }
+      iterator& operator ++ () { ++_node; return (*this); }
+      iterator operator ++ (int) { iterator tmp(*this); ++_node; return (tmp); }
+      iterator& operator -- () { --_node; return (*this); }
+      iterator operator -- (int) { iterator tmp(*this); --_node; return (tmp); }
 
-      iterator operator + (int i) const { return (*this); }
-      iterator& operator += (int i) { return (*this); }
+      iterator operator + (int i) const { iterator tmp(_node + i);  return tmp; }
+      iterator& operator += (int i) { _node += i; return (*this); }
 
-      iterator& operator = (const iterator& i) { return (*this); }
+      iterator& operator = (const iterator& i) { _node = i._node; return (*this); }
 
-      bool operator != (const iterator& i) const { return false; }
-      bool operator == (const iterator& i) const { return false; }
+      bool operator != (const iterator& i) const { return (_node != i._node); }
+      bool operator == (const iterator& i) const { return (_node == i._node); }
 
    private:
       T*    _node;
    };
 
    // TODO: implement these functions
-   iterator begin() const { return 0; }
-   iterator end() const { return 0; }
-   bool empty() const { return false; }
-   size_t size() const { return 0; }
+   iterator begin() const { return iterator(_data); }
+   iterator end() const { return iterator(_data+_size-1); }
+   bool empty() const { return !(_size); }
+   size_t size() const { return _size; }
 
-   T& operator [] (size_t i) { return _data[0]; }
-   const T& operator [] (size_t i) const { return _data[0]; }
+   T& operator [] (size_t i) { return _data[i]; }
+   const T& operator [] (size_t i) const { return _data[i]; }
 
    void push_back(const T& x) { }
    void pop_front() { }
