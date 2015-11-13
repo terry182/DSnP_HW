@@ -33,7 +33,7 @@ public:
       iterator(const iterator& i): _node(i._node) {}
       ~iterator() {} // Should NOT delete _node
 
-      // TODO: implement these overloaded operators
+      // TODO: DONE. implement these overloaded operators
       const T& operator * () const { return (*_node); }
       T& operator * () { return (*_node); }
       iterator& operator ++ () { ++_node; return (*this); }
@@ -55,21 +55,58 @@ public:
 
    // TODO: implement these functions
    iterator begin() const { return iterator(_data); }
-   iterator end() const { return iterator(_data+_size-1); }
+   iterator end() const { return iterator(_data+_size); }
    bool empty() const { return !(_size); }
    size_t size() const { return _size; }
 
    T& operator [] (size_t i) { return _data[i]; }
    const T& operator [] (size_t i) const { return _data[i]; }
 
-   void push_back(const T& x) { }
-   void pop_front() { }
-   void pop_back() { }
+   void push_back(const T& x)
+   {
+       if (_size < _capacity) _data[_size++] = x;
+       else
+       {
+           T* newData = new T[(_capacity ? _capacity*2 : 1024)];
+           memcpy(newData, _data, _capacity);
+           _capacity = (_capacity ? _capacity*2 : 1024);
+           delete[] _data;
+           _data = newData;
+           _data[_size++] = x;
+       }
+   }
+   void pop_front()
+   {
+       memcpy(_data, _data+1, _capacity-1);
+       --_size;
+   }
+   void pop_back()
+   {
+       --_size;
+   }
 
-   bool erase(iterator pos) { return false; }
-   bool erase(const T& x) { return false; }
+   bool erase(iterator pos)
+   {
+       if (empty()) return false;
+       memcpy(pos._node, pos._node+1, sizeof(T)*(_size - 1 - (pos._node-_data)));
+       --_size;
+       return true;
+   }
+   bool erase(const T& x)
+   {
+       for (iterator i = begin(); i != end(); ++i)
+           if (*i == x)
+           {
+               erase(i);
+               return true;
+           }
+       return false;
+   }
 
-   void clear() { }
+   void clear()
+   {
+       _size = 0;
+   }
 
    // This is done. DO NOT change this one.
    void sort() const { if (!empty()) ::sort(_data, _data+_size); }
