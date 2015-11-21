@@ -49,25 +49,25 @@ class DList
             friend class DList;
 
             public:
-            iterator(DListNode<T>* n= 0): _node(n) {}
-            iterator(const iterator& i) : _node(i._node) {}
-            ~iterator() {} // Should NOT delete _node
+                iterator(DListNode<T>* n= 0): _node(n) {}
+                iterator(const iterator& i) : _node(i._node) {}
+                ~iterator() {} // Should NOT delete _node
 
-            // TODO: implement these overloaded operators
-            const T& operator * () const { return *(_node); }
-            T& operator * () { return *(_node); }
-            iterator& operator ++ () { _node = _node->_next; return *(this); }
-            iterator operator ++ (int) { iterator tmp(*this); _node = _node->_next; return tmp; }
-            iterator& operator -- () { _node = _node->_prev; return *(this); }
-            iterator operator -- (int) { iterator tmp(*this); _node = _node->_prev; return tmp; }
+                // TODO: implement these overloaded operators
+                const T& operator * () const { return *(_node); }
+                T& operator * () { return *(_node); }
+                iterator& operator ++ () { _node = _node->_next; return *(this); }
+                iterator operator ++ (int) { iterator tmp(*this); _node = _node->_next; return tmp; }
+                iterator& operator -- () { _node = _node->_prev; return *(this); }
+                iterator operator -- (int) { iterator tmp(*this); _node = _node->_prev; return tmp; }
 
-            iterator& operator = (const iterator& i) { _node = i._node; return *(this); }
+                iterator& operator = (const iterator& i) { _node = i._node; return *(this); }
 
-            bool operator != (const iterator& i) const { return (node != i._node); }
-            bool operator == (const iterator& i) const { return (node == i._node); }
+                bool operator != (const iterator& i) const { return (node != i._node); }
+                bool operator == (const iterator& i) const { return (node == i._node); }
 
             private:
-            DListNode<T>* _node;
+                DListNode<T>* _node;
         };
 
         // TODO: implement these functions
@@ -105,8 +105,17 @@ class DList
         }
 
         // return false if nothing to erase
-        bool erase(iterator pos) { return false; }
-        bool erase(const T& x) { return false; }
+        bool erase(iterator pos) 
+        {   if (empty()) return false;
+            pos->_node->_prev->_next = pos->_node->_prev;
+            pos->_node->_next->_prev = pos->_node->_prev;
+            delete pos->_node;
+            return true; 
+        }
+        bool erase(const T& x) 
+        { 
+            return false; 
+        }
 
         void clear() { }  // delete all nodes except for the dummy node
 

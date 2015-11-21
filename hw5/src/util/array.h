@@ -68,7 +68,7 @@ public:
        else
        {
            T* newData = new T[(_capacity ? _capacity*2 : 1024)];
-           memcpy(newData, _data, _capacity);
+           for (size_t i = 0; i < _size; ++i) newData[i] = _data[i];
            _capacity = (_capacity ? _capacity*2 : 1024);
            delete[] _data;
            _data = newData;
@@ -77,7 +77,7 @@ public:
    }
    void pop_front()
    {
-       memcpy(_data, _data+1, _capacity-1);
+       for (size_t i = 0; i < _size-1; ++i) data[i] = data[i+1]
        --_size;
    }
    void pop_back()
@@ -88,7 +88,7 @@ public:
    bool erase(iterator pos)
    {
        if (empty()) return false;
-       memcpy(pos._node, pos._node+1, sizeof(T)*(_size - 1 - (pos._node-_data)));
+       for (iterator i = pos+1; i != end(); ++i) *(i-1) = *i;
        --_size;
        return true;
    }
