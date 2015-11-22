@@ -1,4 +1,4 @@
-#! /bin/csh
+#! /bin/zsh
 
 echo "Usage: do.all <adtTest.xxx>"
 

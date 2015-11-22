@@ -96,10 +96,7 @@ public:
    {
        for (iterator i = begin(); i != end(); ++i)
            if (*i == x)
-           {
-               erase(i);
-               return true;
-           }
+               return erase(i);
        return false;
    }
 
