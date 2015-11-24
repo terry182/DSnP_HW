@@ -77,7 +77,7 @@ public:
    }
    void pop_front()
    {
-       for (size_t i = 0; i < _size-1; ++i) data[i] = data[i+1]
+       for (size_t i = 0; i < _size-1; ++i) _data[i] = _data[i+1];
        --_size;
    }
    void pop_back()
@@ -88,7 +88,7 @@ public:
    bool erase(iterator pos)
    {
        if (empty()) return false;
-       for (iterator i = pos+1; i != end(); ++i) *(i-1) = *i;
+       for (iterator i = pos; i != end(); ++i) *i = *(i+1);
        --_size;
        return true;
    }
