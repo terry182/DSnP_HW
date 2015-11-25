@@ -129,6 +129,7 @@ class BSTree
         {   if (empty())
             {   BSTreeNode<T>* ptr = new BSTreeNode<T>(x, 0, 0, _tail);
                 _root = ptr;
+                _tail->_parent = ptr;
                 ++_size;
                 return iterator(ptr);
             }
