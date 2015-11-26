@@ -1,0 +1,125 @@
+Testing dlist, preforming N=10000:
+  #0... OK. 0.005 ms
+  #1... OK. 0.004 ms
+  #2... OK. 0.004 ms
+  #3... OK. 0.004 ms
+  #4... OK. 0.004 ms
+Testing dlist, preforming N=30000:
+  #0... OK. 0.010 ms
+  #1... OK. 0.009 ms
+  #2... OK. 0.009 ms
+  #3... OK. 0.009 ms
+  #4... OK. 0.009 ms
+Testing dlist, preforming N=100000:
+  #0... OK. 0.027 ms
+  #1... OK. 0.027 ms
+  #2... OK. 0.027 ms
+  #3... OK. 0.027 ms
+  #4... OK. 0.027 ms
+Testing dlist, preforming N=300000:
+  #0... OK. 0.076 ms
+  #1... OK. 0.076 ms
+  #2... OK. 0.078 ms
+  #3... OK. 0.077 ms
+  #4... OK. 0.076 ms
+Testing dlist, preforming N=1000000:
+  #0... OK. 0.247 ms
+  #1... OK. 0.245 ms
+  #2... OK. 0.247 ms
+  #3... OK. 0.245 ms
+  #4... OK. 0.246 ms
+Testing dlist, preforming N=3000000:
+  #0... OK. 0.735 ms
+  #1... OK. 0.735 ms
+  #2... OK. 0.776 ms
+  #3... OK. 0.752 ms
+  #4... OK. 0.767 ms
+Testing dlist, preforming N=10000000:
+  #0... OK. 2.752 ms
+  #1... OK. 2.989 ms
+  #2... OK. 2.969 ms
+  #3... OK. 2.954 ms
+  #4... OK. 2.929 ms
+Testing array, preforming N=10000:
+  #0... OK. 0.011 ms
+  #1... OK. 0.019 ms
+  #2... OK. 0.010 ms
+  #3... OK. 0.010 ms
+  #4... OK. 0.014 ms
+Testing array, preforming N=30000:
+  #0... OK. 0.025 ms
+  #1... OK. 0.033 ms
+  #2... OK. 0.029 ms
+  #3... OK. 0.019 ms
+  #4... OK. 0.022 ms
+Testing array, preforming N=100000:
+  #0... OK. 0.073 ms
+  #1... OK. 0.062 ms
+  #2... OK. 0.075 ms
+  #3... OK. 0.063 ms
+  #4... OK. 0.075 ms
+Testing array, preforming N=300000:
+  #0... OK. 0.253 ms
+  #1... OK. 0.283 ms
+  #2... OK. 0.244 ms
+  #3... OK. 0.248 ms
+  #4... OK. 0.251 ms
+Testing array, preforming N=1000000:
+  #0... OK. 0.588 ms
+  #1... OK. 0.590 ms
+  #2... OK. 0.596 ms
+  #3... OK. 0.632 ms
+  #4... OK. 0.603 ms
+Testing array, preforming N=3000000:
+  #0... OK. 2.253 ms
+  #1... OK. 2.150 ms
+  #2... OK. 2.187 ms
+  #3... OK. 2.125 ms
+  #4... OK. 2.111 ms
+Testing array, preforming N=10000000:
+  #0... OK. 8.152 ms
+  #1... OK. 7.872 ms
+  #2... OK. 8.004 ms
+  #3... OK. 7.926 ms
+  #4... OK. 7.817 ms
+Testing bst, preforming N=10000:
+  #0... OK. 0.016 ms
+  #1... OK. 0.008 ms
+  #2... OK. 0.008 ms
+  #3... OK. 0.012 ms
+  #4... OK. 0.009 ms
+Testing bst, preforming N=30000:
+  #0... OK. 0.026 ms
+  #1... OK. 0.037 ms
+  #2... OK. 0.027 ms
+  #3... OK. 0.032 ms
+  #4... OK. 0.034 ms
+Testing bst, preforming N=100000:
+  #0... OK. 0.124 ms
+  #1... OK. 0.124 ms
+  #2... OK. 0.127 ms
+  #3... OK. 0.126 ms
+  #4... OK. 0.131 ms
+Testing bst, preforming N=300000:
+  #0... OK. 0.485 ms
+  #1... OK. 0.490 ms
+  #2... OK. 0.502 ms
+  #3... OK. 0.502 ms
+  #4... OK. 0.525 ms
+Testing bst, preforming N=1000000:
+  #0... OK. 2.145 ms
+  #1... OK. 2.097 ms
+  #2... OK. 2.080 ms
+  #3... OK. 2.108 ms
+  #4... OK. 2.024 ms
+Testing bst, preforming N=3000000:
+  #0... OK. 7.579 ms
+  #1... OK. 7.639 ms
+  #2... OK. 7.438 ms
+  #3... OK. 7.643 ms
+  #4... OK. 7.856 ms
+Testing bst, preforming N=10000000:
+  #0... OK. 30.881 ms
+  #1... OK. 31.812 ms
+  #2... OK. 32.597 ms
+  #3... 

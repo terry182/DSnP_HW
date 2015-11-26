@@ -1,0 +1,540 @@
+======== dlist :: 10000 :: 0 ========
+adt> adta -r 10000
+
+adt> adtd -r 10000
+
+adt> usage 
+Period time used : 0.17 seconds
+Total time used  : 0.17 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== dlist :: 10000 :: 1 ========
+adt> adta -r 10000
+
+adt> adtd -r 10000
+
+adt> usage 
+Period time used : 0.17 seconds
+Total time used  : 0.17 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== dlist :: 10000 :: 2 ========
+adt> adta -r 10000
+
+adt> adtd -r 10000
+
+adt> usage 
+Period time used : 0.17 seconds
+Total time used  : 0.17 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== dlist :: 10000 :: 3 ========
+adt> adta -r 10000
+
+adt> adtd -r 10000
+
+adt> usage 
+Period time used : 0.2 seconds
+Total time used  : 0.2 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== dlist :: 10000 :: 4 ========
+adt> adta -r 10000
+
+adt> adtd -r 10000
+
+adt> usage 
+Period time used : 0.19 seconds
+Total time used  : 0.19 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== dlist :: 30000 :: 0 ========
+adt> adta -r 30000
+
+adt> adtd -r 30000
+
+adt> usage 
+Period time used : 2.18 seconds
+Total time used  : 2.18 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== dlist :: 30000 :: 1 ========
+adt> adta -r 30000
+
+adt> adtd -r 30000
+
+adt> usage 
+Period time used : 2.4 seconds
+Total time used  : 2.4 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== dlist :: 30000 :: 2 ========
+adt> adta -r 30000
+
+adt> adtd -r 30000
+
+adt> usage 
+Period time used : 2.69 seconds
+Total time used  : 2.69 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== dlist :: 30000 :: 3 ========
+adt> adta -r 30000
+
+adt> adtd -r 30000
+
+adt> usage 
+Period time used : 2.61 seconds
+Total time used  : 2.61 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== dlist :: 30000 :: 4 ========
+adt> adta -r 30000
+
+adt> adtd -r 30000
+
+adt> usage 
+Period time used : 2.39 seconds
+Total time used  : 2.39 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== dlist :: 100000 :: 0 ========
+adt> adta -r 100000
+
+adt> adtd -r 100000
+
+adt> usage 
+Period time used : 42.36 seconds
+Total time used  : 42.36 seconds
+Total memory used: 3.797 M Bytes
+
+adt> q -f
+
+======== dlist :: 100000 :: 1 ========
+adt> adta -r 100000
+
+adt> adtd -r 100000
+
+adt> usage 
+Period time used : 42.13 seconds
+Total time used  : 42.13 seconds
+Total memory used: 4.051 M Bytes
+
+adt> q -f
+
+======== dlist :: 100000 :: 2 ========
+adt> adta -r 100000
+
+adt> adtd -r 100000
+
+adt> usage 
+Period time used : 45.03 seconds
+Total time used  : 45.03 seconds
+Total memory used: 4.055 M Bytes
+
+adt> q -f
+
+======== dlist :: 100000 :: 3 ========
+adt> adta -r 100000
+
+adt> adtd -r 100000
+
+adt> usage 
+Period time used : 47.84 seconds
+Total time used  : 47.84 seconds
+Total memory used: 3.949 M Bytes
+
+adt> q -f
+
+======== dlist :: 100000 :: 4 ========
+adt> adta -r 100000
+
+adt> adtd -r 100000
+
+adt> usage 
+Period time used : 44.39 seconds
+Total time used  : 44.39 seconds
+Total memory used: 4.066 M Bytes
+
+adt> q -f
+
+======== array :: 10000 :: 0 ========
+adt> adta -r 10000
+
+adt> adtd -r 10000
+
+adt> usage 
+Period time used : 0.24 seconds
+Total time used  : 0.24 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== array :: 10000 :: 1 ========
+adt> adta -r 10000
+
+adt> adtd -r 10000
+
+adt> usage 
+Period time used : 0.27 seconds
+Total time used  : 0.27 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== array :: 10000 :: 2 ========
+adt> adta -r 10000
+
+adt> adtd -r 10000
+
+adt> usage 
+Period time used : 0.27 seconds
+Total time used  : 0.27 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== array :: 10000 :: 3 ========
+adt> adta -r 10000
+
+adt> adtd -r 10000
+
+adt> usage 
+Period time used : 0.27 seconds
+Total time used  : 0.27 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== array :: 10000 :: 4 ========
+adt> adta -r 10000
+
+adt> adtd -r 10000
+
+adt> usage 
+Period time used : 0.28 seconds
+Total time used  : 0.28 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== array :: 30000 :: 0 ========
+adt> adta -r 30000
+
+adt> adtd -r 30000
+
+adt> usage 
+Period time used : 2.41 seconds
+Total time used  : 2.41 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== array :: 30000 :: 1 ========
+adt> adta -r 30000
+
+adt> adtd -r 30000
+
+adt> usage 
+Period time used : 2.35 seconds
+Total time used  : 2.35 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== array :: 30000 :: 2 ========
+adt> adta -r 30000
+
+adt> adtd -r 30000
+
+adt> usage 
+Period time used : 2.38 seconds
+Total time used  : 2.38 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== array :: 30000 :: 3 ========
+adt> adta -r 30000
+
+adt> adtd -r 30000
+
+adt> usage 
+Period time used : 2.4 seconds
+Total time used  : 2.4 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== array :: 30000 :: 4 ========
+adt> adta -r 30000
+
+adt> adtd -r 30000
+
+adt> usage 
+Period time used : 2.51 seconds
+Total time used  : 2.51 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== array :: 100000 :: 0 ========
+adt> adta -r 100000
+
+adt> adtd -r 100000
+
+adt> usage 
+Period time used : 33.09 seconds
+Total time used  : 33.09 seconds
+Total memory used: 6.742 M Bytes
+
+adt> q -f
+
+======== array :: 100000 :: 1 ========
+adt> adta -r 100000
+
+adt> adtd -r 100000
+
+adt> usage 
+Period time used : 34.1 seconds
+Total time used  : 34.1 seconds
+Total memory used: 6.875 M Bytes
+
+adt> q -f
+
+======== array :: 100000 :: 2 ========
+adt> adta -r 100000
+
+adt> adtd -r 100000
+
+adt> usage 
+Period time used : 32.47 seconds
+Total time used  : 32.47 seconds
+Total memory used: 6.52 M Bytes
+
+adt> q -f
+
+======== array :: 100000 :: 3 ========
+adt> adta -r 100000
+
+adt> adtd -r 100000
+
+adt> usage 
+Period time used : 33.59 seconds
+Total time used  : 33.59 seconds
+Total memory used: 6.773 M Bytes
+
+adt> q -f
+
+======== array :: 100000 :: 4 ========
+adt> adta -r 100000
+
+adt> adtd -r 100000
+
+adt> usage 
+Period time used : 33.39 seconds
+Total time used  : 33.39 seconds
+Total memory used: 6.844 M Bytes
+
+adt> q -f
+
+======== bst :: 10000 :: 0 ========
+adt> adta -r 10000
+
+adt> adtd -r 10000
+
+adt> usage 
+Period time used : 0.69 seconds
+Total time used  : 0.69 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== bst :: 10000 :: 1 ========
+adt> adta -r 10000
+
+adt> adtd -r 10000
+
+adt> usage 
+Period time used : 0.66 seconds
+Total time used  : 0.66 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== bst :: 10000 :: 2 ========
+adt> adta -r 10000
+
+adt> adtd -r 10000
+
+adt> usage 
+Period time used : 0.66 seconds
+Total time used  : 0.66 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== bst :: 10000 :: 3 ========
+adt> adta -r 10000
+
+adt> adtd -r 10000
+
+adt> usage 
+Period time used : 0.67 seconds
+Total time used  : 0.67 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== bst :: 10000 :: 4 ========
+adt> adta -r 10000
+
+adt> adtd -r 10000
+
+adt> usage 
+Period time used : 0.66 seconds
+Total time used  : 0.66 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== bst :: 30000 :: 0 ========
+adt> adta -r 30000
+
+adt> adtd -r 30000
+
+adt> usage 
+Period time used : 9.04 seconds
+Total time used  : 9.04 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== bst :: 30000 :: 1 ========
+adt> adta -r 30000
+
+adt> adtd -r 30000
+
+adt> usage 
+Period time used : 8.64 seconds
+Total time used  : 8.64 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== bst :: 30000 :: 2 ========
+adt> adta -r 30000
+
+adt> adtd -r 30000
+
+adt> usage 
+Period time used : 8.35 seconds
+Total time used  : 8.35 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== bst :: 30000 :: 3 ========
+adt> adta -r 30000
+
+adt> adtd -r 30000
+
+adt> usage 
+Period time used : 8.47 seconds
+Total time used  : 8.47 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== bst :: 30000 :: 4 ========
+adt> adta -r 30000
+
+adt> adtd -r 30000
+
+adt> usage 
+Period time used : 8.6 seconds
+Total time used  : 8.6 seconds
+Total memory used: 0 M Bytes
+
+adt> q -f
+
+======== bst :: 100000 :: 0 ========
+adt> adta -r 100000
+
+adt> adtd -r 100000
+
+adt> usage 
+Period time used : 216.1 seconds
+Total time used  : 216.1 seconds
+Total memory used: 5.395 M Bytes
+
+adt> q -f
+
+======== bst :: 100000 :: 1 ========
+adt> adta -r 100000
+
+adt> adtd -r 100000
+
+adt> usage 
+Period time used : 230.9 seconds
+Total time used  : 230.9 seconds
+Total memory used: 5.414 M Bytes
+
+adt> q -f
+
+======== bst :: 100000 :: 2 ========
+adt> adta -r 100000
+
+adt> adtd -r 100000
+
+adt> usage 
+Period time used : 229.6 seconds
+Total time used  : 229.6 seconds
+Total memory used: 5.609 M Bytes
+
+adt> q -f
+
+======== bst :: 100000 :: 3 ========
+adt> adta -r 100000
+
+adt> adtd -r 100000
+
+adt> usage 
+Period time used : 233 seconds
+Total time used  : 233 seconds
+Total memory used: 5.594 M Bytes
+
+adt> q -f
+
+======== bst :: 100000 :: 4 ========
+adt> adta -r 100000
+
+adt> adtd -r 100000
+
+adt> usage 
+Period time used : 234.1 seconds
+Total time used  : 234.1 seconds
+Total memory used: 5.578 M Bytes
+
+adt> q -f
+

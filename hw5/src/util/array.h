@@ -67,9 +67,9 @@ public:
        if (_size < _capacity) _data[_size++] = x;
        else
        {
-           T* newData = new T[(_capacity ? _capacity*2 : 1024)];
+           T* newData = new T[(_capacity ? _capacity*2 : 1)];
            for (size_t i = 0; i < _size; ++i) newData[i] = _data[i];
-           _capacity = (_capacity ? _capacity*2 : 1024);
+           _capacity = (_capacity ? _capacity*2 : 1);
            delete[] _data;
            _data = newData;
            _data[_size++] = x;
