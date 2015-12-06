@@ -58,7 +58,7 @@ class CirAigGate: public CirGate
         CirAigGate(int id = 0, int lineNum = 0):CirGate(id, lineNum) {}
         void printGate() const{};
         string getTypeStr() const
-        {   if (_id == 0) return "CONST0";
+        {   if (_id == 0) return "CONST";
             return ((getLineNo()) ? "AIG" : "UNDEF"); 
         }
 };

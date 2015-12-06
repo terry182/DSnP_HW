@@ -37,7 +37,7 @@ void CirGate::netflow(int &cnt, bool flag[]) const
 
     flag[_id] = true; // Visited
     cout << "["<< cnt++ << "] ";
-    if (getTypeStr() == "CONST0")
+    if (getTypeStr() == "CONST")
         cout << "CONST0";
     else if (getTypeStr() == "AIG")
         cout << "AIG";
@@ -64,7 +64,7 @@ void CirGate::faninFlow(int depth, int &level, bool neg, std::set<int> &s) const
     
     if (neg) cout << "!";
 
-    if (getTypeStr() != "CONST0") cout << getTypeStr() << " " << _id;
+    if (getTypeStr() != "CONST") cout << getTypeStr() << " " << _id;
     else cout << "CONST 0";
 
     if (depth < level)
@@ -87,7 +87,7 @@ void CirGate::fanoutFlow(int depth, int &level, bool neg, std::set<int> &s) cons
     
     if (neg) cout << "!";
 
-    if (getTypeStr() != "CONST0") cout << getTypeStr() << " " << _id;
+    if (getTypeStr() != "CONST") cout << getTypeStr() << " " << _id;
     else cout << "CONST 0";
     if (depth < level)
     {   

@@ -433,43 +433,42 @@ void
 CirMgr::writeAag(ostream& outfile) const
 {
     // header
-    cout << "aag";
-    for (int i = 0; i < 5; ++i) cout << " " << _params[i];
-    cout << endl;
+    outfile << "aag";
+    for (int i = 0; i < 5; ++i) outfile << " " << _params[i];
+    outfile << endl;
     
     // PI
     for (int i = 0; i < _piList.size(); ++i)
-        cout << _piList[i]->_id*2 << endl;
+        outfile << _piList[i]->_id*2 << endl;
     
     // PO
     for (int i = 0; i < _poList.size(); ++i)
     {   CirGate* ptr = (CirGate*)(_poList[i]->_fanin[0] & ~(size_t)(0x1));
-        cout << ptr->_id*2 + (_poList[i]->_fanin[0] & 1) << endl;
+        outfile << ptr->_id*2 + (_poList[i]->_fanin[0] & 1) << endl;
     }
 
     // AIG
     for (int i = 0; i < _aigList.size(); ++i)
-    {   cout << _aigList[i]->_id;
+    {   outfile << _aigList[i]->_id;
         for (int j = 0; j < _aigList[i]->_fanin.size(); ++j)
         {   CirGate* ptr = (CirGate*)(_aigList[i]->_fanin[j] & ~(size_t)0x1);
-            cout << " " << ptr->_id* 2 + (_aigList[i]->_fanin[j] & 1);
+            outfile << " " << ptr->_id* 2 + (_aigList[i]->_fanin[j] & 1);
         }
-        cout << endl;
+        outfile << endl;
     }
     
     for (int i = 0; i < _piList.size(); ++i)
     {   if (_piList[i]->_name != "")
-            cout << "i" << i << " " << _piList[i]->_name << endl;
+            outfile << "i" << i << " " << _piList[i]->_name << endl;
     }
     for (int i = 0; i < _poList.size(); ++i)
     {   if (_poList[i]->_name != "")
-            cout << "o" << i << " " << _poList[i]->_name << endl;
+            outfile << "o" << i << " " << _poList[i]->_name << endl;
     }
     if (_comments.size())
-    {   cout << "c" << endl;
+    {   outfile << "c" << endl;
         for (int i = 0; i < _comments.size(); ++i)
-            cout << _comments[i] << endl;
-        cout << endl;
+            outfile << _comments[i] << endl;
     }
 }
 
