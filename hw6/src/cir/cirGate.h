@@ -11,6 +11,7 @@
 
 #include <string>
 #include <vector>
+#include <set>
 #include <iostream>
 #include "cirDef.h"
 
@@ -40,6 +41,8 @@ class CirGate
         virtual void reportFanin(int level) const;
         virtual void reportFanout(int level) const;
         void netflow(int &cnt, bool flag[]) const;
+        void faninFlow(int depth, int &level, bool neg, set<int> &set) const;
+        void fanoutFlow(int depth, int &level, bool neg, set<int> &set) const;
 
     private:
         int _id;

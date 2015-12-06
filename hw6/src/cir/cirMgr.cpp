@@ -409,7 +409,7 @@ CirMgr::printFloatGates() const
     for (int i = 0; i < _gateList.size(); ++i)
         if (_gateList[i]->getTypeStr() == "UNDEF")
         {   for (int j = 0; j < _gateList[i]->_fanout.size(); ++j)
-            {   CirGate* out = (CirGate*)(_gateList[i]->_fanout[j] & (size_t)(~0x1));
+            {   CirGate* out = (CirGate*)(_gateList[i]->_fanout[j] & ~(size_t)(0x1));
                 p.insert(out->_id);
             }
         }
@@ -443,7 +443,7 @@ CirMgr::writeAag(ostream& outfile) const
     
     // PO
     for (int i = 0; i < _poList.size(); ++i)
-    {   CirGate* ptr = (CirGate*)(_poList[i]->_fanin[0] & ~(size_t)(0x1))
+    {   CirGate* ptr = (CirGate*)(_poList[i]->_fanin[0] & ~(size_t)(0x1));
         cout << ptr->_id*2 + (_poList[i]->_fanin[0] & 1) << endl;
     }
 
@@ -451,8 +451,8 @@ CirMgr::writeAag(ostream& outfile) const
     for (int i = 0; i < _aigList.size(); ++i)
     {   cout << _aigList[i]->_id;
         for (int j = 0; j < _aigList[i]->_fanin.size(); ++j)
-        {   CirGate* ptr = (CirGate*)(_aigList[i]->_fanin[j] & ~(size_t)0x1)
-            cout << " " << ptr->_id* 2 + _aigList[i]->_fanin[j] & 1;
+        {   CirGate* ptr = (CirGate*)(_aigList[i]->_fanin[j] & ~(size_t)0x1);
+            cout << " " << ptr->_id* 2 + (_aigList[i]->_fanin[j] & 1);
         }
         cout << endl;
     }

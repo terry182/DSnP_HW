@@ -4,12 +4,13 @@
   Synopsis     [ Define class CirAigGate member functions ]
   Author       [ Chung-Yang (Ric) Huang ]
   Copyright    [ Copyleft(c) 2008-present LaDs(III), GIEE, NTU, Taiwan ]
-****************************************************************************/
+ ****************************************************************************/
 
 #include <iostream>
 #include <iomanip>
 #include <sstream>
 #include <stdarg.h>
+#include <set>
 #include <cassert>
 #include "cirGate.h"
 #include "cirMgr.h"
@@ -33,7 +34,7 @@ void CirGate::netflow(int &cnt, bool flag[]) const
         if (ptr->getTypeStr() != "UNDEF")
             ptr->netflow(cnt, flag);
     }
-    
+
     flag[_id] = true; // Visited
     cout << "["<< cnt++ << "] ";
     if (getTypeStr() == "CONST0")
@@ -47,7 +48,7 @@ void CirGate::netflow(int &cnt, bool flag[]) const
     if (_id) cout << " " << _id;
     for (int i = 0; i < _fanin.size(); ++i)
     {   cout << " ";
-        CirGate* ptr = (CirGate*)(_fanin[i] & ~0x1);
+        CirGate* ptr = (CirGate*)(_fanin[i] & ~(size_t)0x1);
         if (ptr->getTypeStr() == "UNDEF") cout << "*";
         if (_fanin[i] & 1) cout << "!";
         cout << ptr->_id;
@@ -57,23 +58,69 @@ void CirGate::netflow(int &cnt, bool flag[]) const
     cout << endl;
 }
 
-void
-CirGate::reportGate() const
+void CirGate::faninFlow(int depth, int &level, bool neg, std::set<int> &s) const
+{   // indent
+    for (int i = 0; i < depth; ++i) cout << "  ";
+    
+    if (neg) cout << "!";
+
+    if (getTypeStr() != "CONST0") cout << getTypeStr() << " " << _id;
+    else cout << "CONST 0";
+
+    if (depth < level)
+    {   if (s.find(_id) != s.end()) cout << " (*)" << endl;
+        else 
+        {   cout << endl;
+            if (_fanin.size()) s.insert(_id);
+            for (int i = 0; i < _fanin.size(); ++i)
+            {   CirGate* ptr = (CirGate*)(_fanin[i] & ~(size_t)(0x1));
+                ptr->faninFlow(depth+1, level, _fanin[i]&1, s);
+            }
+        }
+    }
+    else cout << endl;
+}
+
+void CirGate::fanoutFlow(int depth, int &level, bool neg, std::set<int> &s) const
+{   // indent
+    for (int i = 0; i < depth; ++i) cout << "  ";
+    
+    if (neg) cout << "!";
+
+    if (getTypeStr() != "CONST0") cout << getTypeStr() << " " << _id;
+    else cout << "CONST 0";
+    if (depth < level)
+    {   
+        if (s.find(_id) != s.end()) cout << " (*)" << endl;
+        else 
+        {   cout << endl;
+            if (_fanout.size()) s.insert(_id);
+            for (int i = 0; i < _fanout.size(); ++i)
+            {   CirGate* ptr = (CirGate*)(_fanout[i] & ~(size_t)(0x1));
+                ptr->fanoutFlow(depth+1, level, _fanout[i]&1, s);
+            }
+        }
+    }
+    else cout << endl;
+}
+void CirGate::reportGate() const
 {
     cout << "==================================================" << endl;
     cout << "= " << getTypeStr() << "("<< _id << "), line " << getLineNo() << "= " << endl;
     cout << "==================================================" << endl;
 }
 
-void
-CirGate::reportFanin(int level) const
+void CirGate::reportFanin(int level) const
 {
-   assert (level >= 0);
+    assert (level >= 0);
+    set<int> set;
+    faninFlow(0, level, 0, set);
 }
 
-void
-CirGate::reportFanout(int level) const
+void CirGate::reportFanout(int level) const
 {
-   assert (level >= 0);
+    assert (level >= 0);
+    set<int> set;
+    fanoutFlow(0, level, 0, set);
 }
 
