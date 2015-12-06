@@ -11,12 +11,14 @@
 
 #include <vector>
 #include <string>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 
 using namespace std;
 
 #include "cirDef.h"
+#include "cirGate.h"
 
 extern CirMgr *cirMgr;
 
@@ -24,12 +26,12 @@ extern CirMgr *cirMgr;
 class CirMgr
 {
     public:
-        CirMgr(){}
+        CirMgr() { memset(_params, 0, sizeof(_params)); }
         ~CirMgr() {}
 
         // Access functions
         // return '0' if "gid" corresponds to an undefined gate.
-        CirGate* getGate(unsigned gid) const { return 0; }
+        CirGate* getGate(unsigned gid) const;
 
         // Member functions about circuit construction
         bool readCircuit(const string&);
@@ -45,9 +47,10 @@ class CirMgr
     private:
         int              _params[5];    // M I L O A
         vector<CirGate*> _gateList;
-        vector<size_t>   _piList;       // Store Index of _gateList;
-        vector<size_t>   _poList;       
-        vector<size_t>   _aigList;
+        vector<CirPiGate*>   _piList;       // Store things in pointers
+        vector<CirPoGate*>   _poList;       
+        vector<CirAigGate*>   _aigList;
+        vector<string>   _comments;
 };
 
 #endif // CIR_MGR_H
