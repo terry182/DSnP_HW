@@ -510,7 +510,7 @@ bool CirMgr::readCircuit(const string& fileName)
         {   errMsg = line[0];
             return parseError(ILLEGAL_SYMBOL_TYPE);
         }
-
+        bool flag = 0;
         for (colNo = 1; colNo < line.size(); ++colNo)
         {   if (line[colNo] < 32)
             {   errInt = line[colNo];
@@ -523,6 +523,7 @@ bool CirMgr::readCircuit(const string& fileName)
                 {   errMsg = "symbol index(" + token + ")";
                     return parseError(ILLEGAL_NUM);
                 }
+                flag = 1;
                 if (type == 0)
                 {   if (idx >= _piList.size())
                     {   errMsg = "symbol index(" + token + ")";
@@ -539,9 +540,10 @@ bool CirMgr::readCircuit(const string& fileName)
                         {   errInt = line[colNo];
                             return parseError(ILLEGAL_SYMBOL_NAME);  // Space character 
                         }
-                        token += line[j];
+                        else if (line[j] != ' ')token += line[j];
                     }
-                    _piList[idx]->_name = token;
+                    if (token == "") flag = 0;
+                    else _piList[idx]->_name = token;
                 } 
                 else if (type == 1)
                 {   if (idx >= _poList.size())
@@ -559,13 +561,19 @@ bool CirMgr::readCircuit(const string& fileName)
                         {   errInt = line[colNo];
                             return parseError(ILLEGAL_SYMBOL_NAME);  // Space character 
                         }
-                        token += line[j];
+                        else if (line[j] != ' ')token += line[j];
                     }
-                    _poList[idx]->_name = token;
+                    if (token == "") flag = 0;
+                    else _poList[idx]->_name = token;
                 }
                 break;
             }
         }
+            if (!flag) 
+            {
+                errMsg = "symbolic name";
+                return parseError(MISSING_IDENTIFIER);
+            }
     }
     lineNo = colNo = 0; // Reset the two counters
     errMsg = "";
