@@ -239,11 +239,11 @@ bool CirMgr::readCircuit(const string& fileName)
 
     // Read PI gates
     for (int i = 0; i < _params[1]; ++i)
-    {   if(s.eof())
+    {   getline(s, line);
+        if(s.eof())
         {   errMsg = "PI";
             return parseError(MISSING_DEF);
         }
-        getline(s, line);
         ++lineNo;
         string token = "";
         for (colNo = 0; colNo < line.size(); ++colNo)
@@ -302,12 +302,11 @@ bool CirMgr::readCircuit(const string& fileName)
     // Read PO gates
     int oid = _params[0];
     for (int i = 0; i < _params[3]; ++i)
-    {   if(s.eof())
+    {   getline(s, line);
+        if(s.eof())
         {   errMsg = "PO";
             return parseError(MISSING_DEF);
         }
-
-        getline(s, line);
         ++lineNo;
         string token="";
         for (colNo = 0; colNo < line.size(); ++colNo)
@@ -336,10 +335,6 @@ bool CirMgr::readCircuit(const string& fileName)
         {   errMsg = "number (" + token+")"; 
             return parseError(ILLEGAL_NUM);
         }
-        else if (id < 2)
-        {   errInt = id;
-            return parseError(REDEF_CONST);
-        }
         else if (id > _params[0]*2+1)
         {   errInt = id;
             return parseError(MAX_LIT_ID);
@@ -360,14 +355,14 @@ bool CirMgr::readCircuit(const string& fileName)
         _gateList.push_back(g);
         _poList.push_back((CirPoGate*)g);
     }
-    // end of Reading PO Gates
+    // end of Reading PO Gate
     // Reading AIGs
     for (int i = 0; i < _params[4]; ++i)
-    {   if (s.eof())
+    {   getline(s, line);
+        if (s.eof())
         {   errMsg = "AIG";
             return parseError(MISSING_DEF);
         }
-        getline(s, line);
         ++lineNo;
         string token="";
         bool flag = 0;
@@ -492,6 +487,7 @@ bool CirMgr::readCircuit(const string& fileName)
     int type = -1; //0 for i , 1 for o, 2 for c
     while (!s.eof())
     {   getline(s, line);
+        if (s.eof()) break;
         ++lineNo;
         string token="";
         colNo = 0; // Reset col No here 
@@ -548,7 +544,7 @@ bool CirMgr::readCircuit(const string& fileName)
                     _piList[idx]->_name = token;
                 } 
                 else if (type == 1)
-                {   if (idx >= _piList.size())
+                {   if (idx >= _poList.size())
                     {   errMsg = "symbol index(" + token + ")";
                         return parseError(ILLEGAL_NUM);
                     }
@@ -565,9 +561,7 @@ bool CirMgr::readCircuit(const string& fileName)
                         }
                         token += line[j];
                     }
-                    if (_poList[idx]->_name != "")
-                        return parseError(REDEF_SYMBOLIC_NAME);
-                    else _poList[idx]->_name = line.substr(colNo+1);
+                    _poList[idx]->_name = token;
                 }
                 break;
             }
