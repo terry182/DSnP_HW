@@ -87,8 +87,7 @@ void CirGate::fanoutFlow(int depth, int &level, bool neg, std::set<int> &s) cons
     
     if (neg) cout << "!";
 
-    if (getTypeStr() != "CONST") cout << getTypeStr() << " " << _id;
-    else cout << "CONST 0";
+    cout << getTypeStr() << " " << _id;
     if (depth < level)
     {   
         if (s.find(_id) != s.end()) cout << " (*)" << endl;
@@ -105,8 +104,17 @@ void CirGate::fanoutFlow(int depth, int &level, bool neg, std::set<int> &s) cons
 }
 void CirGate::reportGate() const
 {
+    stringstream s;
+    s << "= " << getTypeStr() << "(" << _id << ")"; 
+    if (getTypeStr() == "PI" && ((CirPiGate*)this)->_name != "")
+        s << "\"" << ((CirPiGate*)this)->_name << "\"";
+    if (getTypeStr() == "PO" && ((CirPoGate*)this)->_name != "")
+        s << "\"" << ((CirPoGate*)this)->_name << "\"";
+    s << ", line " << getLineNo();
+    string p;
+    getline(s, p);
     cout << "==================================================" << endl;
-    cout << "= " << getTypeStr() << "("<< _id << "), line " << getLineNo() << "= " << endl;
+    cout << setw(49) << left << p << "="<< endl;
     cout << "==================================================" << endl;
 }
 

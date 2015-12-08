@@ -153,57 +153,147 @@ bool CirMgr::readCircuit(const string& fileName)
     ifstream s(fileName);
     if (!s.is_open()) { cerr << "Cannot open design \"" << fileName << "\"!!\n"; return false; }// File cannot open
     string line;
-    lineNo = 0;
+    lineNo = -1;
     // Reading the first line
     if (s.eof()) return false;
     getline(s, line);
-    string token;
+    string token="";
     ++lineNo;
     int tempInt = 0;
-    for (colNo = 1; colNo <= line.size(); ++colNo)
-    {   if (line[colNo-1] != ' ') token += line[colNo-1];
-        else if (colNo == 1) return false;
-        else if (line[colNo-1] < 32) return false;  // Space character 
-        else if (line[colNo-2] == ' ') return false;
-        else if (token != "aag") return false;
-        else { ++colNo; token = ""; break; }
+    for (colNo = 0; colNo < line.size(); ++colNo)
+    {   
+        if (line[colNo] < 32) 
+        {   errInt = line[colNo];
+            return parseError(ILLEGAL_WSPACE);  // Space character 
+        }
+        else if (line[colNo] != ' ')
+        {   if (token == "aag" && isdigit(line[colNo])) return parseError(MISSING_SPACE);
+            token += line[colNo];
+        }
+        else if (colNo == 0)
+            return parseError(EXTRA_SPACE);
+        else if (line[colNo-1] == ' ') // Extra white space
+            return parseError(EXTRA_SPACE);
+        else if (token != "aag")
+        {   
+            errMsg = token;
+            return parseError(ILLEGAL_IDENTIFIER);
+        }
+        else { ++colNo; break; }
     }
+    if (token == "")
+    {   errMsg = "\"aag\"";
+        return parseError(MISSING_IDENTIFIER);
+    }
+    token = "";
     int idx = 0;
-    for (idx = 0; colNo <= line.size(); ++colNo)
-    {   if (line[colNo-1] != ' ') token += line[colNo-1];
-        else if (line[colNo-1] < 32) return false;  // Space character 
-        else if (line[colNo-2] == ' ') return false;
-        else if (idx == 5) return false;   // A new line expected
+    for (idx = 0; colNo < line.size(); ++colNo)
+    {   if (line[colNo] < 32)
+        {   errInt = line[colNo];
+            return parseError(ILLEGAL_WSPACE);  // Space character 
+        }
+        else if (line[colNo] != ' ') token += line[colNo];
+        else if (line[colNo-1] == ' ') // Extra white space
+            return parseError(EXTRA_SPACE);
+        else if (idx == 5)
+            return parseError(MISSING_NEWLINE);
         else 
-        {   myStr2Int(token, _params[idx++]);  // Some error handling here
+        {   if (token == "")
+            {   errMsg = "number of vars";
+                return parseError(MISSING_NUM);
+            }
+            else if (!myStr2Int(token, _params[idx++]))  // Some error handling here
+            {   errMsg = "number (" + token+")"; 
+                return parseError(ILLEGAL_NUM);// some error handling here
+            }
+            if (idx == 5)
+               return parseError(MISSING_NEWLINE);
             token = ""; 
         }
     }
-    myStr2Int(token, _params[idx++]);  // Some error handling here
+    if (token == "")
+    {   errMsg = "number of vars";
+        return parseError(MISSING_NUM);
+    }
+    else if (!myStr2Int(token, _params[idx++]))  // Some error handling here
+    {   errMsg = "number (" + token+")"; 
+        return parseError(ILLEGAL_NUM);// some error handling here
+    }
     token = ""; 
 
+    if (idx < 5)
+    {   errMsg = "number of vars";
+        return parseError(MISSING_NUM);
+    }
+    else if (_params[2] > 0)
+    {
+        errMsg = "latches";
+        return parseError(ILLEGAL_NUM);
+    }
+    else if (_params[0] < _params[1] + _params[4])
+    {   errInt = _params[0];
+        errMsg = "Num of variables";
+        return parseError(NUM_TOO_SMALL);
+    }
     // End of Reading the first line
 
     // Read PI gates
     for (int i = 0; i < _params[1]; ++i)
-    {   if(s.eof()) break;
+    {   if(s.eof())
+        {   errMsg = "PI";
+            return parseError(MISSING_DEF);
+        }
         getline(s, line);
         ++lineNo;
         string token = "";
-        for (colNo = 1; colNo <= line.size(); ++colNo)
-        {   if (line[colNo-1] != ' ') token += line[colNo-1];
+        for (colNo = 0; colNo < line.size(); ++colNo)
+        {   if (line[colNo] < 32)
+            {   errInt = line[colNo];
+                return parseError(ILLEGAL_WSPACE);  // Space character 
+            }
+            else if (line[colNo] != ' ') token += line[colNo];
             else 
             {   int id = 0;
-                myStr2Int(token, id); // some error handling here
-                CirGate* g = new CirPiGate(id/2, lineNo);
-                _gateList.push_back(g);
-                _piList.push_back((CirPiGate*)g);
-                token = "";
+                if (token == "") return parseError(EXTRA_SPACE);
+                else if (!myStr2Int(token, id))
+                {   errMsg = "number (" + token+")"; 
+                    return parseError(ILLEGAL_NUM);// some error handling here
+                }
+                else 
+                    return parseError(MISSING_NEWLINE);
             }
         }
         int id = 0;
-        myStr2Int(token, id); // some error handling here
-        CirGate* g = new CirPiGate(id/2, lineNo);
+        if (token == "")
+        {   errMsg = "PI";
+            return parseError(MISSING_DEF);
+        }
+        else if (!myStr2Int(token, id)) // some error handling here
+        {   errMsg = "number (" + token+")"; 
+            return parseError(ILLEGAL_NUM);// some error handling here
+        }
+        else if (id < 2)
+        {   errInt = id;
+            return parseError(REDEF_CONST);
+        }
+        else if (id & 1)
+        {   errInt = id;
+            errMsg = "PI";
+            return parseError(CANNOT_INVERTED);
+        }
+        else if (id > _params[0]*2)
+        {   errInt = id;
+            return parseError(MAX_LIT_ID);
+        }
+        else 
+        {   CirGate* tmp = getGate(id/2);
+            if (tmp)
+            {   errGate = tmp;
+                errInt = id;
+                return parseError(REDEF_GATE);
+            }
+        }
+        CirGate* g = new CirPiGate(id/2, lineNo+1);
         _gateList.push_back(g);
         _piList.push_back((CirPiGate*)g);
     }
@@ -212,16 +302,49 @@ bool CirMgr::readCircuit(const string& fileName)
     // Read PO gates
     int oid = _params[0];
     for (int i = 0; i < _params[3]; ++i)
-    {   if(s.eof()) break;
+    {   if(s.eof())
+        {   errMsg = "PO";
+            return parseError(MISSING_DEF);
+        }
+
         getline(s, line);
         ++lineNo;
-        string token;
-        //      for (colNo = 1; colNo < line.size(); ++colNo)
-        //      {   if (line[colNo-1] != ' ') token += line[colNo-1];
-        //         else{
+        string token="";
+        for (colNo = 0; colNo < line.size(); ++colNo)
+        {   if (line[colNo] < 32) 
+            {   errInt = line[colNo];
+                return parseError(ILLEGAL_WSPACE);  // Space character 
+            }
+            else if (line[colNo] != ' ') token += line[colNo];
+            else 
+            {   int id = 0;
+                if (token == "") return parseError(EXTRA_SPACE);
+                else if (!myStr2Int(token, id))
+                {   errMsg = "number (" + token+")"; 
+                    return parseError(ILLEGAL_NUM);// some error handling here
+                }
+                else 
+                    return parseError(MISSING_NEWLINE);
+            }
+        }
         int id = 0;
-        myStr2Int(line, id); // some error handling here
-        CirGate* g = new CirPoGate(++oid, lineNo);
+        if (token == "")
+        {   errMsg = "PO";
+            return parseError(MISSING_DEF);
+        }
+        else if (!myStr2Int(line, id)) // some error handling here
+        {   errMsg = "number (" + token+")"; 
+            return parseError(ILLEGAL_NUM);
+        }
+        else if (id < 2)
+        {   errInt = id;
+            return parseError(REDEF_CONST);
+        }
+        else if (id > _params[0]*2+1)
+        {   errInt = id;
+            return parseError(MAX_LIT_ID);
+        }
+        CirGate* g = new CirPoGate(++oid, lineNo+1);
         CirGate* temp = getGate(id/2);
         if (!temp)
         {   
@@ -236,32 +359,62 @@ bool CirMgr::readCircuit(const string& fileName)
         }
         _gateList.push_back(g);
         _poList.push_back((CirPoGate*)g);
-        //        }
-        //   }
     }
     // end of Reading PO Gates
     // Reading AIGs
     for (int i = 0; i < _params[4]; ++i)
-    {   if (s.eof()) break;
+    {   if (s.eof())
+        {   errMsg = "AIG";
+            return parseError(MISSING_DEF);
+        }
         getline(s, line);
         ++lineNo;
         string token="";
         bool flag = 0;
         CirAigGate* g = 0;
-        for (colNo = 1; colNo <= line.size(); ++colNo)
-        {   if (line[colNo-1] != ' ') token += line[colNo-1];
+        for (colNo = 0; colNo < line.size(); ++colNo)
+        {   if (line[colNo] < 32)
+            {   errInt = line[colNo];
+                return parseError(ILLEGAL_WSPACE);  // Space character 
+            }
+            else if (line[colNo] != ' ') token += line[colNo];
             else
             {   int id = 0;
-                myStr2Int(token, id);
+                if (token == "")
+                    return parseError(EXTRA_SPACE);
+                else if (!myStr2Int(token, id))
+                {   errMsg = "number (" + token+")"; 
+                    return parseError(ILLEGAL_NUM);
+                }
+                else if (id > _params[0]*2)
+                {   errInt = id;
+                    return parseError(MAX_LIT_ID);
+                }
+
                 if (!flag)
-                {   CirGate* tmp = getGate(id/2);
+                {   
+                    if (id < 2)
+                    {   errInt = id;
+                        return parseError(REDEF_CONST);
+                    }
+                    else if (id & 1)
+                    {   errInt = id;
+                        errMsg = "AIG";
+                        return parseError(CANNOT_INVERTED);
+                    }
+                    CirGate* tmp = getGate(id/2);
                     if (tmp != 0)
-                    {   tmp->_lineNum = lineNo;
+                    {   if (tmp->_lineNum) 
+                        {   errGate = tmp;
+                            errInt = id;
+                            return parseError(REDEF_GATE);
+                        }
+                        tmp->_lineNum = lineNo+1;
                         _aigList.push_back((CirAigGate*)tmp);
                         g = (CirAigGate*)tmp;  // Before definition, must be Aig
                     }
                     else
-                    {   g = new CirAigGate(id/2, lineNo);
+                    {   g = new CirAigGate(id/2, lineNo+1);
                         _gateList.push_back(g);
                         _aigList.push_back((CirAigGate*)g);
                     }
@@ -280,15 +433,44 @@ bool CirMgr::readCircuit(const string& fileName)
             }
         }
         int id = 0;
-        myStr2Int(token, id);
+        if (!flag && token == "")
+        {   errMsg = "AIG";
+            return parseError(MISSING_DEF);
+        }
+        else if (token == "")
+            return parseError(EXTRA_SPACE);
+        else if (!myStr2Int(token, id))
+        {   errMsg = "number" + token;
+            return parseError(ILLEGAL_NUM);
+        }
+
         if (!flag)
-        {   g = new CirAigGate(id/2, lineNo);
-            _gateList.push_back(g);
-            _aigList.push_back((CirAigGate*)g);
-            flag = 1;
+        {   
+            if (id < 2)
+            {   errInt = id;
+                return parseError(REDEF_CONST);
+            }
+            else if (id & 1)
+            {   errInt = id;
+                errMsg = "AIG";
+                return parseError(CANNOT_INVERTED);
+            }
+            else if (id > _params[0]*2)
+            {   errInt = id;
+                return parseError(MAX_LIT_ID);
+            }
+            else 
+            {   errMsg = "AIG inputs";
+                return parseError(MISSING_NUM);
+            }
         }
         else 
-        {   CirGate* tmp = getGate(id/2);
+        {   
+            if (id > _params[0]*2+1)
+            {   errInt = id;
+                return parseError(MAX_LIT_ID);
+            }
+            CirGate* tmp = getGate(id/2);
             if (!tmp)
             {   tmp = new CirAigGate(id/2, 0);   
                 _gateList.push_back(tmp);
@@ -296,6 +478,11 @@ bool CirMgr::readCircuit(const string& fileName)
                 
             tmp->_fanout.push_back((size_t)g | (size_t)(id & 1));
             g->_fanin.push_back((size_t)(tmp) | (size_t)(id & 1));
+
+            if (g->_fanin.size() < 2)
+            {   errMsg = "AIG inputs";
+                return parseError(MISSING_NUM);
+            }
         }
         token = "";
     }
@@ -307,11 +494,15 @@ bool CirMgr::readCircuit(const string& fileName)
     {   getline(s, line);
         ++lineNo;
         string token="";
-        if (line[0] == ' ') return false; // Wtf is this
+        colNo = 0; // Reset col No here 
+        if (line.size() == 0) return parseError(EXTRA_SPACE);
+        if (line[0] == ' ') return parseError(EXTRA_SPACE); // Wtf is this
         if (line[0] == 'i') type = 0;
         else if (line[0] == 'o') type = 1;
         else if (line[0] == 'c')
-        {   while (!s.eof())
+        {   if (line.size() != 1)
+                return parseError(MISSING_NEWLINE);
+            while (!s.eof())
             {   getline(s, line);
                 ++lineNo;
                 if (line.size() == 0) break;
@@ -319,25 +510,71 @@ bool CirMgr::readCircuit(const string& fileName)
             }
             break;
         }
+        else 
+        {   errMsg = line[0];
+            return parseError(ILLEGAL_SYMBOL_TYPE);
+        }
 
-        for (colNo = 2; colNo <= line.size(); ++colNo)
-        {   if (line[colNo-1] != ' ') token += line[colNo-1];
+        for (colNo = 1; colNo < line.size(); ++colNo)
+        {   if (line[colNo] < 32)
+            {   errInt = line[colNo];
+                return parseError(ILLEGAL_WSPACE);  // Space character 
+            }
+            else if (line[colNo] != ' ') token += line[colNo];
             else 
             {   int idx;
-                if(!myStr2Int(token, idx)) return false;
+                if(!myStr2Int(token, idx))
+                {   errMsg = "symbol index(" + token + ")";
+                    return parseError(ILLEGAL_NUM);
+                }
                 if (type == 0)
-                {   if (idx >= _piList.size()) return false; 
-                    _piList[idx]->_name = line.substr(colNo);
+                {   if (idx >= _piList.size())
+                    {   errMsg = "symbol index(" + token + ")";
+                        return parseError(ILLEGAL_NUM);
+                    }
+                    else if (_piList[idx]->_name != "")
+                    {   errMsg = "i";
+                        errInt = idx;
+                        return parseError(REDEF_SYMBOLIC_NAME);
+                    }
+                    token = "";
+                    for (int j = colNo+1; j < line.size(); ++j)
+                    {   if (line[j] < 32)
+                        {   errInt = line[colNo];
+                            return parseError(ILLEGAL_SYMBOL_NAME);  // Space character 
+                        }
+                        token += line[j];
+                    }
+                    _piList[idx]->_name = token;
                 } 
-                else
-                {   if (idx >= _poList.size()) return false;
-                    _poList[idx]->_name = line.substr(colNo);
+                else if (type == 1)
+                {   if (idx >= _piList.size())
+                    {   errMsg = "symbol index(" + token + ")";
+                        return parseError(ILLEGAL_NUM);
+                    }
+                    else if (_poList[idx]->_name != "")
+                    {   errMsg = "o";
+                        errInt = idx;
+                        return parseError(REDEF_SYMBOLIC_NAME);
+                    }
+                    token = "";
+                    for (int j = colNo+1; j < line.size(); ++j)
+                    {   if (line[j] < 32)
+                        {   errInt = line[colNo];
+                            return parseError(ILLEGAL_SYMBOL_NAME);  // Space character 
+                        }
+                        token += line[j];
+                    }
+                    if (_poList[idx]->_name != "")
+                        return parseError(REDEF_SYMBOLIC_NAME);
+                    else _poList[idx]->_name = line.substr(colNo+1);
                 }
                 break;
             }
         }
     }
     lineNo = colNo = 0; // Reset the two counters
+    errMsg = "";
     return true;
 }
 
@@ -367,14 +604,14 @@ CirMgr::printSummary() const
     int total = 0;
     cout << "Circuit Statistics" << endl;
     cout << "==================" << endl;
-    cout << "PI" <<  right << setw(12) << _piList.size()<< endl;
+    cout << "  PI" <<  right << setw(12) << _piList.size()<< endl;
     total += _piList.size();
-    cout << "PO" <<  right << setw(12) <<_poList.size() << endl;
+    cout << "  PO" <<  right << setw(12) <<_poList.size() << endl;
     total += _poList.size();
-    cout << "AIG" << right << setw(11) << _aigList.size() << endl;
+    cout << "  AIG" << right << setw(11) << _aigList.size() << endl;
     total += _aigList.size();
     cout << "------------------" << endl;
-    cout << "Total" << right << setw(9) << total << endl;
+    cout << "  Total" << right << setw(9) << total << endl;
 }
 
 void CirMgr::printNetlist() const
@@ -449,10 +686,10 @@ CirMgr::writeAag(ostream& outfile) const
 
     // AIG
     for (int i = 0; i < _aigList.size(); ++i)
-    {   outfile << _aigList[i]->_id;
+    {   outfile << (_aigList[i]->_id << 1);
         for (int j = 0; j < _aigList[i]->_fanin.size(); ++j)
         {   CirGate* ptr = (CirGate*)(_aigList[i]->_fanin[j] & ~(size_t)0x1);
-            outfile << " " << ptr->_id* 2 + (_aigList[i]->_fanin[j] & 1);
+            outfile << " " << ptr->_id*2 + (_aigList[i]->_fanin[j] & 1);
         }
         outfile << endl;
     }
