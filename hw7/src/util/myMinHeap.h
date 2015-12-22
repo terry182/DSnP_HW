@@ -28,7 +28,7 @@ class MinHeap
 
         size_t size() const { return _data.size(); }
 
-        // TODO
+        // TODO : Done.
         const Data& min() const { return _data[0]; }
         void insert(const Data& d) 
         {   _data.push_back(d);
