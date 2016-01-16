@@ -49,7 +49,7 @@ class CirGate
         void reportFanout(int level) const;
 
         // DFS functions
-        void netflow(bool[], vector<CirGate*>&) const;
+        void netflow(bool[], vector<CirGate*>&, bool checkDel = false) const;
         void faninFlow(int depth, int &level, bool neg, set<int> &set) const;
         void fanoutFlow(int depth, int &level, bool neg, set<int> &set) const;
 

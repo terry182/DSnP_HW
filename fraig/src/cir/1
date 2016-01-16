@@ -46,7 +46,7 @@ void CirMgr::sweep()
     {   unsigned gid = delList[i]->getId();
         // Remove from Gate List
         _gateList[gid] = 0;
-        if (delList[i]->getType() == AIG_GATE) --_params[4]; // Number change.
+        if (delList[i]->getType == AIG_GATE) --_params[4]; // Number change.
         cout << "Sweeping: ";
         cout << delList[i]->getTypeStr() << "(" << gid << ") removed..." << endl;
     }

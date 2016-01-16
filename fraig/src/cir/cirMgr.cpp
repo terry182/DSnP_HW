@@ -655,7 +655,8 @@ CirMgr::printFloatGates() const
         for (std::set<int>::iterator it=q.begin(); it!=q.end(); ++it)
             cout << " " << *it;
         cout << endl;
-    } } 
+    } 
+} 
 void CirMgr::printFECPairs() const
 {
 }

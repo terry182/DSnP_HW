@@ -26,12 +26,13 @@ extern CirMgr *cirMgr;
 /**************************************/
 /*   class CirGate member functions   */
 /**************************************/
-void CirGate::netflow(bool flag[], vector<CirGate*>& list) const
+void CirGate::netflow(bool flag[], vector<CirGate*>& list, bool checkDel) const
 {   if (flag[_id]) return;
+    if (checkDel && getType() == PI_GATE) return ;
     for (int i = 0; i < _fanin.size(); ++i)
     {   CirGate* ptr = (CirGate*)(_fanin[i] & ~(size_t)(0x1));
-        if (ptr->getType() != UNDEF_GATE)
-            ptr->netflow(flag, list);
+        if (checkDel || ptr->getType() != UNDEF_GATE)
+            ptr->netflow(flag, list, checkDel);
     }
 
     flag[_id] = true; // Visited
