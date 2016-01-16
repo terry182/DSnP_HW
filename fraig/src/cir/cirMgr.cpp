@@ -655,16 +655,53 @@ CirMgr::printFloatGates() const
         for (std::set<int>::iterator it=q.begin(); it!=q.end(); ++it)
             cout << " " << *it;
         cout << endl;
-    }
-}
-
+    } } 
 void CirMgr::printFECPairs() const
 {
 }
 
 void
 CirMgr::writeAag(ostream& outfile) const
-{
+{   // header
+    outfile << "aag";
+    for (int i = 0; i < 5; ++i) outfile << " " << _params[i];
+    outfile << endl;
+
+    // PI
+    for (int i = 0; i < _piList.size(); ++i)
+        outfile << _piList[i]->_id*2 << endl;
+
+    // PO
+    for (int i = 0; i < _poList.size(); ++i)
+    {   CirGate* ptr = (CirGate*)(_poList[i]->_fanin[0] & ~(size_t)(0x1));
+        outfile << ptr->_id*2 + (_poList[i]->_fanin[0] & 1) << endl;
+    }
+
+    // AIG, only those in DFSList
+    for (int i = 0, s = _dfsList.size(); i < s; ++i)
+        if (_dfsList[i]->getType() == AIG_GATE)
+        {   outfile << (_dfsList[i]->getId() << 1);
+            for (unsigned j = 0, n = _dfsList[i]->_fanin.size(); j < n; ++j)
+            {   CirGate* ptr = (CirGate*)(_dfsList[i]->_fanin[j] & ~(size_t)0x1);
+                outfile << " " << ptr->_id*2 + (_dfsList[i]->_fanin[j] & 1);
+            }
+            outfile << endl;
+        }
+
+    for (int i = 0; i < _piList.size(); ++i)
+    {   if (_piList[i]->_name != "")
+            outfile << "i" << i << " " << _piList[i]->_name << endl;
+    }
+    for (int i = 0; i < _poList.size(); ++i)
+    {   if (_poList[i]->_name != "")
+            outfile << "o" << i << " " << _poList[i]->_name << endl;
+    }
+    if (_comments.size())
+    {   outfile << "c" << endl;
+        for (int i = 0; i < _comments.size(); ++i)
+            outfile << _comments[i] << endl;
+    }
+
 }
 
 void

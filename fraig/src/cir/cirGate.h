@@ -11,6 +11,7 @@
 
 #include <string>
 #include <vector>
+#include <set>
 #include <iostream>
 #include "cirDef.h"
 #include "sat.h"
@@ -49,6 +50,8 @@ class CirGate
 
         // DFS functions
         void netflow(bool[], vector<CirGate*>&) const;
+        void faninFlow(int depth, int &level, bool neg, set<int> &set) const;
+        void fanoutFlow(int depth, int &level, bool neg, set<int> &set) const;
 
     private:
         int _id;
@@ -112,6 +115,7 @@ class CirPiGate: public CirGate
 class CirPoGate: public CirGate
 {
     friend class CirMgr;
+    friend class CirGate;
     public:
         CirPoGate(int id = 0, int lineNum = 0): CirGate(id, lineNum), _name(""){}
         string getTypeStr() const { return "PO"; }
