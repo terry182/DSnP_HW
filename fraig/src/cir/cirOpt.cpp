@@ -31,25 +31,39 @@ using namespace std;
 // DFS list should NOT be changed
 // UNDEF, float and unused list may be changed
 void CirMgr::sweep()
-{   vector<CirGate*> delList;
-    bool flag[_gateList.size()];
+{   bool flag[_gateList.size()];
     memset(flag, 0, sizeof(flag));
+    vector<CirGate*> delList;
 
     flag[0] = true; // CONST should not be removed.
     for (int i = 0; i < _dfsList.size(); ++i) flag[_dfsList[i]->getId()] = true; // Those in _dfsList just let it be visited
+    for (int i = 0; i < _piList.size(); ++i) flag[_piList[i]->getId()] = true;
     
     for (int i = 0, n = _gateList.size(); i < n; i++)
-        if (_gateList[i]->getType() == AIG_GATE && _gateList[i]->_fanout.size() == 0)
-            _gateList[i]->netflow(flag, delList, true);
+        if (flag[i])
+        {   vector<size_t>::iterator p = _gateList[i]->_fanout.begin();
+            for (unsigned j = 0, m = _gateList[i]->_fanout.size(); j < m; j++)
+            {   CirGate* ptr = (CirGate*)(_gateList[i]->_fanout[j] & ~(size_t)(0x1));
+                if (!flag[ptr->getId()]) _gateList[i]->_fanout.erase(p+j);
+            }
+        }
+        else if (_gateList[i] && _gateList[i]->getType() == AIG_GATE)
+        {   --_params[4];
+            cout << "Sweeeping: ";
+            delList.push_back(_gateList[i]);
+            cout << _gateList[i]->getTypeStr() << "(" << i << ")";
+            _gateList[i] = 0;
+            cout << " removed..." << endl;
+        }             
+        else if (_gateList[i])
+        {   delList.push_back(_gateList[i]);
+            cout << "Sweeeping: ";
+            cout << _gateList[i]->getTypeStr() << "(" << i << ")";
+            cout << " removed..." << endl;
+            _gateList[i] = 0;
+        }             
+    for (int i = 0; i < delList.size(); ++i)  delete delList[i];
 
-    for (int i = 0; i < delList.size(); i++) 
-    {   unsigned gid = delList[i]->getId();
-        // Remove from Gate List
-        _gateList[gid] = 0;
-        if (delList[i]->getType == AIG_GATE) --_params[4]; // Number change.
-        cout << "Sweeping: ";
-        cout << delList[i]->getTypeStr() << "(" << gid << ") removed..." << endl;
-    }
 }
 
 // Recursively simplifying from POs;
