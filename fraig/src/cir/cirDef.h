@@ -25,14 +25,30 @@ class CirMgr;
 class SatSolver;
 
 enum GateType
-{   
+{
     UNDEF_GATE = 0,
     PI_GATE = 1,
-    PO_GATE = 2, 
+    PO_GATE = 2,
     AIG_GATE = 3,
     CONST_GATE = 4,
 
     TOT_GATE
 };
+
+// Hash Key Definition for strash
+class HashKey {
+
+private:
+    size_t in[2];
+public:
+    size_t operator() () const
+    {
+    }
+    bool operator == (const HashKey& k) const
+    {
+      
+    }
+};
+
 
 #endif // CIR_DEF_H

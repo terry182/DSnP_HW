@@ -33,7 +33,10 @@ using namespace std;
 // _unusedList and _undefList won't be changed
 void
 CirMgr::strash()
-{
+{   for (unsigned i = 0, n = _dfsList.size(); i < n; i++)
+      if (_dfsList[i]->getType() == AIG_GATE) // Only Merge AIG_GATE
+      {   
+      }
 }
 
 void

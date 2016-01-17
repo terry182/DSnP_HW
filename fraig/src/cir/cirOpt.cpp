@@ -76,20 +76,41 @@ void CirMgr::optimize()
                CirGate* ptr[2] = {(CirGate*)(ls[0] & ~(size_t)0x1), (CirGate*)(ls[1] & ~(size_t)0x1)};
 
                if (ls[0] == ls[1])   // A and A = A
-                  replaceGate(_dfsList[i], ptr[0], ls[0]&1); // replace _dfsList[i] with _dfsList[i]->_fanin
+               {
+                    replaceGate(_dfsList[i], ptr[0], ls[0]&1); // replace _dfsList[i] with _dfsList[i]->_fanin
+               }
                else if (ptr[0] == ptr[1])   // A and Not A = 0
-                  replaceGate(_dfsList[i], _gateList[0], 0);// replace _dfsList[i] with const 0
+                {
+                     replaceGate(_dfsList[i], _gateList[0], 0);// replace _dfsList[i] with const 0
+                }
                else if (ls[0] == (size_t)_gateList[0] || ls[1] == (size_t)_gateList[0]) // O and A = 0
-                    replaceGate(_dfsList[i], _gateList[0], 0); // same as above
-               else if (ptr[0] == _gateList[0] || ptr[1] == _gateList[0]) // 1 and A = A
-                    replaceGate(_dfsList[i], ptr[(ptr[0] == _gateList[0])], ls[(ptr[0] == _gateList[0])]&1);
+               {      replaceGate(_dfsList[i], _gateList[0], 0); // same as above
+        //            cout << "Case 3 " << endl;
+               }
+                else if (ptr[0] == _gateList[0] || ptr[1] == _gateList[0]) // 1 and A = A
+                {    replaceGate(_dfsList[i], ptr[(ptr[0] == _gateList[0])], ls[(ptr[0] == _gateList[0])]&1);
+          //            cout << "Case 4 " << endl;
+                }
+                else continue;    // This is fucking IMPORTANT
 
-               for (int i = 0; i < 2; ++i)
-                  for (int j = 0; j < ptr[i]->_fanout.size(); ++j)
-                      if (((CirGate*)(ptr[i]->_fanout[j] & ~(size_t)0x1)) == _dfsList[i])
-                           ptr[i]->_fanout.erase(ptr[i]->_fanout.begin()+j);
-                           
+      //          cout << "fuck" << endl;
+                for (int k = 0; k < 2; ++k)
+                  for (int j = 0; j < ptr[k]->_fanout.size(); ++j)
+                  {   if ( ((CirGate*)(ptr[k]->_fanout[j] & ~(size_t)0x1)) == _dfsList[i])
+                      {  //   cout << "delete some shit" << endl;
+                            ptr[k]->_fanout.erase(ptr[k]->_fanout.begin()+j); // Delete Instance in input's output
+                      }
+                      if (ptr[k]->getType() == UNDEF_GATE && ptr[k]->_fanout.empty())
+                      {
+                              cout << "Simplifying: " << ptr[k]->getId() << " removed..." <<  endl;
+
+                              _gateList[ptr[k]->getId()] = 0; // Remove this gate
+                              delete ptr[k];
+                      }
+                  }
                _gateList[_dfsList[i]->getId()] = 0;         // delete instance in gateList
+               --_params[4];  // Number
+          //     cout << "Delete Gate " << _dfsList[i]->getId() << endl;
                delete _dfsList[i];
           }
 
@@ -100,14 +121,15 @@ void CirMgr::optimize()
 /*   Private member functions about optimization   */
 /***************************************************/
 void CirMgr::replaceGate(CirGate* ori, CirGate* tar, const bool& inverse)
-{    for (size_t i = 0; i < ori->_fanout.size(); i++)
+{   cout << "Simplifying: " << tar->getId() << " merging " << (inverse ? "!" : "") << ori->getId() << "..." <<  endl;
+    for (size_t i = 0; i < ori->_fanout.size(); i++)
      {    CirGate* ptr = (CirGate*)(ori->_fanout[i] & ~(size_t)0x1);
-          cout << "Target Gate: " << ptr->getId() << endl;
           vector<size_t> &ls = ptr->_fanin;
           for (size_t j = 0; j < ls.size(); j++)
           {    if  ( ((CirGate*)(ls[j] & ~(size_t)0x1)) == ori )
-                    ls[j] = ((size_t)tar | (size_t)(inverse));
+                  {  ls[j] = ((size_t)tar | (size_t)(inverse^(ls[j]&1))); // Need XOR to correct the inverse flag
+                     tar->_fanout.push_back( (size_t) ptr | (size_t)(ls[j]&1) );  // No need to correct once more
+                  }
           }
-          tar->_fanout.push_back( (size_t) ptr | (size_t)(inverse));
      }
 }
