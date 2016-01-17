@@ -584,7 +584,8 @@ CirMgr::readCircuit(const string& fileName)
   Total      162
  *********************/
 void CirMgr::buildDFSList()
-{   bool flag[_params[0]+_params[3]+1];
+{   _dfsList.clear();
+    bool flag[_params[0]+_params[3]+1];
     memset(flag, 0, sizeof(flag));
     for (int i = 0, n = _poList.size(); i < n; ++i)
         _poList[i]->netflow(flag, _dfsList);
@@ -655,8 +656,8 @@ CirMgr::printFloatGates() const
         for (std::set<int>::iterator it=q.begin(); it!=q.end(); ++it)
             cout << " " << *it;
         cout << endl;
-    } 
-} 
+    }
+}
 void CirMgr::printFECPairs() const
 {
 }

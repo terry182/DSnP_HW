@@ -76,6 +76,8 @@ class CirMgr
         vector<string>       _comments;
         ofstream             *_simLog;
 
+        // Private member of optimize
+        void replaceGate(CirGate*, CirGate*, const bool&);
 };
 
 #endif // CIR_MGR_H
