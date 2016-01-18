@@ -76,6 +76,7 @@ class CirMgr
         vector<string>       _comments;
         ofstream             *_simLog;
 
+        list<FECGroup>       _fecGrps;
         // Private member of optimize
         void replaceGate(CirGate*, CirGate*, const bool&);
 };

@@ -34,7 +34,7 @@ class CirGate
 
     public:
         CirGate() {}
-        CirGate(int id = 0, int lineNum = 0): _id(id), _lineNum(lineNum){}
+        CirGate(int id = 0, int lineNum = 0): _id(id), _lineNum(lineNum), _simValue(0){}
         virtual ~CirGate() {}
 
         // Basic access methods
@@ -60,6 +60,7 @@ class CirGate
         int _lineNum;
         vector<size_t> _fanin;
         vector<size_t> _fanout;
+        size_t _simValue;
 };
 
 class ConstGate: public CirGate

@@ -41,10 +41,9 @@ void CirMgr::sweep()
 
     for (int i = 0, n = _gateList.size(); i < n; i++)
         if (flag[i])
-        {   vector<size_t>::iterator p = _gateList[i]->_fanout.begin();
-            for (unsigned j = 0, m = _gateList[i]->_fanout.size(); j < m; j++)
+        {     for (unsigned j = 0; j < _gateList[i]->_fanout.size(); j++)
             {   CirGate* ptr = (CirGate*)(_gateList[i]->_fanout[j] & ~(size_t)(0x1));
-                if (!flag[ptr->getId()]) _gateList[i]->_fanout.erase(p+j);
+                if (!flag[ptr->getId()]) { _gateList[i]->_fanout.erase(_gateList[i]->_fanout.begin()+j); j--; }
             }
         }
         else if (_gateList[i] && _gateList[i]->getType() == AIG_GATE)
@@ -76,27 +75,19 @@ void CirMgr::optimize()
                CirGate* ptr[2] = {(CirGate*)(ls[0] & ~(size_t)0x1), (CirGate*)(ls[1] & ~(size_t)0x1)};
 
                if (ls[0] == ls[1])   // A and A = A
-               {
                     replaceGate(_dfsList[i], ptr[0], ls[0]&1); // replace _dfsList[i] with _dfsList[i]->_fanin
-               }
                else if (ptr[0] == ptr[1])   // A and Not A = 0
-                {
                      replaceGate(_dfsList[i], _gateList[0], 0);// replace _dfsList[i] with const 0
-                }
                else if (ls[0] == (size_t)_gateList[0] || ls[1] == (size_t)_gateList[0]) // O and A = 0
-               {      replaceGate(_dfsList[i], _gateList[0], 0); // same as above
-        //            cout << "Case 3 " << endl;
-               }
+                     replaceGate(_dfsList[i], _gateList[0], 0); // same as above
                 else if (ptr[0] == _gateList[0] || ptr[1] == _gateList[0]) // 1 and A = A
-                {    replaceGate(_dfsList[i], ptr[(ptr[0] == _gateList[0])], ls[(ptr[0] == _gateList[0])]&1);
-          //            cout << "Case 4 " << endl;
-                }
+                    replaceGate(_dfsList[i], ptr[(ptr[0] == _gateList[0])], ls[(ptr[0] == _gateList[0])]&1);
                 else continue;    // This is fucking IMPORTANT
 
-      //          cout << "fuck" << endl;
+                  //          cout << "fuck" << endl;
                _gateList[_dfsList[i]->getId()] = 0;         // delete instance in gateList
                --_params[4];  // Number
-          //     cout << "Delete Gate " << _dfsList[i]->getId() << endl;
+               //     cout << "Delete Gate " << _dfsList[i]->getId() << endl;
                delete _dfsList[i];
           }
 
@@ -124,17 +115,18 @@ void CirMgr::replaceGate(CirGate* ori, CirGate* tar, const bool& inverse)
      // Fanin's Fanout
      CirGate* ptr[2] = {(CirGate*)(ori->_fanin[0] & ~(size_t)0x1), (CirGate*)(ori->_fanin[1] & ~(size_t)0x1)};
      for (int k = 0; k < 2; ++k)
-       for (int j = 0; j < ptr[k]->_fanout.size(); ++j)
+    { for (int j = 0; j < ptr[k]->_fanout.size(); ++j)
        {   if ( ((CirGate*)(ptr[k]->_fanout[j] & ~(size_t)0x1)) == ori)
            {  //   cout << "delete some shit" << endl;
                  ptr[k]->_fanout.erase(ptr[k]->_fanout.begin()+j); // Delete Instance in input's output
            }
-           if (ptr[k]->getType() == UNDEF_GATE && ptr[k]->_fanout.empty())
-           {
-                   cout << "Simplifying: " << ptr[k]->getId() << " removed..." <<  endl;
+        }
+        if (ptr[k]->getType() == UNDEF_GATE && ptr[k]->_fanout.empty())
+        {
+                cout << "Simplifying: " << ptr[k]->getId() << " removed..." <<  endl;
 
-                   _gateList[ptr[k]->getId()] = 0; // Remove this gate
-                   delete ptr[k];
-           }
-       }
+                _gateList[ptr[k]->getId()] = 0; // Remove this gate
+                delete ptr[k];
+        }
+     }
 }

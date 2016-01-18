@@ -25,11 +25,11 @@ using namespace std;
 // {
 // public:
 //    HashKey() {}
-// 
+//
 //    size_t operator() () const { return 0; }
-// 
+//
 //    bool operator == (const HashKey& k) const { return true; }
-// 
+//
 // private:
 // };
 //
@@ -162,6 +162,17 @@ public:
       return false;
    }
 
+   // Personal Hack of the upper one. 
+   bool check(const HashKey& k, HashData* &n) const {
+      size_t b = bucketNum(k);
+      for (size_t i = 0, bn = _buckets[b].size(); i < bn; ++i)
+         if (_buckets[b][i].first == k) {
+            n = &(_buckets[b][i].second);
+            return true;
+         }
+      return false;
+   }
+
    // return true if inserted successfully (i.e. k is not in the hash)
    // return false is k is already in the hash ==> will not insert
    bool insert(const HashKey& k, const HashData& d) {
@@ -211,14 +222,14 @@ private:
 // {
 // public:
 //    CacheKey() {}
-//    
+//
 //    size_t operator() () const { return 0; }
-//   
+//
 //    bool operator == (const CacheKey&) const { return true; }
-//       
+//
 // private:
-// }; 
-// 
+// };
+//
 template <class CacheKey, class CacheData>
 class Cache
 {

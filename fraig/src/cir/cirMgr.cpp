@@ -568,7 +568,7 @@ CirMgr::readCircuit(const string& fileName)
 
 
     f.close();
-    return true;
+    return ok;
 }
 
 /**********************************************************/
@@ -660,6 +660,9 @@ CirMgr::printFloatGates() const
 }
 void CirMgr::printFECPairs() const
 {
+    for (int i = 0; i < _gateList.size(); ++i)
+        if(_gateList[i])
+            cout << _gateList[i]->getTypeStr() << "(" << i << ")\n";
 }
 
 void

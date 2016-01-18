@@ -92,10 +92,22 @@ CirGate::reportGate() const
         s << "\"" << ((CirPiGate*)this)->_name << "\"";
     if (getType() == PO_GATE && !((CirPoGate*)this)->_name.empty())
         s << "\"" << ((CirPoGate*)this)->_name << "\"";
-    s << ", line " << getLineNo();
+    s << ", line " << getLineNo() << endl;
     string p;
     getline(s, p);
     cout << "==================================================" << endl;
+    cout << setw(49) << left << p << "="<< endl;
+    //TODO: Fix here
+    cout << "= FECs:                                          =" << endl;
+
+    s << "= Value: ";
+    size_t v = _simValue;
+    for (int cnt = 0; cnt < 32; cnt++)
+    {     if (cnt && cnt % 4 == 0) s << "_";
+          s << (v&1) ;
+          v >>= 1;
+    }
+    getline(s, p);
     cout << setw(49) << left << p << "="<< endl;
     cout << "==================================================" << endl;
 }

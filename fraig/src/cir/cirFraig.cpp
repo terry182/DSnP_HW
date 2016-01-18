@@ -33,7 +33,7 @@ using namespace std;
 // _unusedList and _undefList won't be changed
 void
 CirMgr::strash()
-{   HashMap<HashKey, CirGate*> hash(_params[0]*4+2);
+{   HashMap<HashKey, CirGate*> hash(_dfsList.size()*2+2);
     for (unsigned i = 0, n = _dfsList.size(); i < n; i++)
       if (_dfsList[i]->getType() == AIG_GATE) // Only Merge AIG_GATE
       {    HashKey k(_dfsList[i]);
