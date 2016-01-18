@@ -94,20 +94,6 @@ void CirMgr::optimize()
                 else continue;    // This is fucking IMPORTANT
 
       //          cout << "fuck" << endl;
-                for (int k = 0; k < 2; ++k)
-                  for (int j = 0; j < ptr[k]->_fanout.size(); ++j)
-                  {   if ( ((CirGate*)(ptr[k]->_fanout[j] & ~(size_t)0x1)) == _dfsList[i])
-                      {  //   cout << "delete some shit" << endl;
-                            ptr[k]->_fanout.erase(ptr[k]->_fanout.begin()+j); // Delete Instance in input's output
-                      }
-                      if (ptr[k]->getType() == UNDEF_GATE && ptr[k]->_fanout.empty())
-                      {
-                              cout << "Simplifying: " << ptr[k]->getId() << " removed..." <<  endl;
-
-                              _gateList[ptr[k]->getId()] = 0; // Remove this gate
-                              delete ptr[k];
-                      }
-                  }
                _gateList[_dfsList[i]->getId()] = 0;         // delete instance in gateList
                --_params[4];  // Number
           //     cout << "Delete Gate " << _dfsList[i]->getId() << endl;
@@ -122,6 +108,8 @@ void CirMgr::optimize()
 /***************************************************/
 void CirMgr::replaceGate(CirGate* ori, CirGate* tar, const bool& inverse)
 {   cout << "Simplifying: " << tar->getId() << " merging " << (inverse ? "!" : "") << ori->getId() << "..." <<  endl;
+
+    // Fanout's Fanin
     for (size_t i = 0; i < ori->_fanout.size(); i++)
      {    CirGate* ptr = (CirGate*)(ori->_fanout[i] & ~(size_t)0x1);
           vector<size_t> &ls = ptr->_fanin;
@@ -132,4 +120,21 @@ void CirMgr::replaceGate(CirGate* ori, CirGate* tar, const bool& inverse)
                   }
           }
      }
+
+     // Fanin's Fanout
+     CirGate* ptr[2] = {(CirGate*)(ori->_fanin[0] & ~(size_t)0x1), (CirGate*)(ori->_fanin[1] & ~(size_t)0x1)};
+     for (int k = 0; k < 2; ++k)
+       for (int j = 0; j < ptr[k]->_fanout.size(); ++j)
+       {   if ( ((CirGate*)(ptr[k]->_fanout[j] & ~(size_t)0x1)) == ori)
+           {  //   cout << "delete some shit" << endl;
+                 ptr[k]->_fanout.erase(ptr[k]->_fanout.begin()+j); // Delete Instance in input's output
+           }
+           if (ptr[k]->getType() == UNDEF_GATE && ptr[k]->_fanout.empty())
+           {
+                   cout << "Simplifying: " << ptr[k]->getId() << " removed..." <<  endl;
+
+                   _gateList[ptr[k]->getId()] = 0; // Remove this gate
+                   delete ptr[k];
+           }
+       }
 }

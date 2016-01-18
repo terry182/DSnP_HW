@@ -16,13 +16,18 @@ using namespace std;
 
 // TODO: define your own typedef or enum
 
+// Definition of Gates
 class CirGate;
 class CirPiGate;
 class CirPoGate;
 class ConstGate;
 class CirAigGate;
+
 class CirMgr;
 class SatSolver;
+
+// Hash Key Definition for strash
+class HashKey;
 
 enum GateType
 {
@@ -34,21 +39,4 @@ enum GateType
 
     TOT_GATE
 };
-
-// Hash Key Definition for strash
-class HashKey {
-
-private:
-    size_t in[2];
-public:
-    size_t operator() () const
-    {
-    }
-    bool operator == (const HashKey& k) const
-    {
-      
-    }
-};
-
-
 #endif // CIR_DEF_H

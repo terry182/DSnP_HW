@@ -30,6 +30,8 @@ class CirGate
     friend class CirMgr;
     friend class CirAigGate;
     friend class CirPoGate;
+    friend class HashKey;
+
     public:
         CirGate() {}
         CirGate(int id = 0, int lineNum = 0): _id(id), _lineNum(lineNum){}
@@ -136,4 +138,20 @@ class CirPoGate: public CirGate
     private:
         string _name;
 };
+
+class HashKey {
+
+private:
+    size_t in[2];
+public:
+    HashKey(CirGate* g)
+    { for (int i = 0; i < 2; ++i) in[i] = g->_fanin[i]; }
+
+    size_t operator() () const { return (in[0] + in[1]);} // TODO: Hope Improve.
+
+    bool operator == (const HashKey& k) const
+    {   return ((in[0] == k.in[0] && in[1] == k.in[1]) || (in[0] == k.in[1] && in[1] == k.in[0])); }
+};
+
+
 #endif // CIR_GATE_H
