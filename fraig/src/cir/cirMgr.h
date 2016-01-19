@@ -83,8 +83,10 @@ class CirMgr
         void replaceGate(CirGate*, CirGate*, const bool&);
 
         //Private member of simluation
-        void simValue(const size_t* &init, list<FECGroup> &fecGrps, HashMap<SimValue, FECGroup> &newFecGrps);
-        
+        void simulate(size_t* const &init, list<FECGroup> &fecGrps, HashMap<SimValue, FECGroup> &newFecGrps);
+        void simFirstTime(size_t* const &init, list<FECGroup> &fecGrps, HashMap<SimValue, FECGroup> &newFecGrps);
+
+
 };
 
 #endif // CIR_MGR_H
