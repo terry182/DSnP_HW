@@ -27,7 +27,9 @@ class CirMgr
 {
     public:
         CirMgr() {}
-        ~CirMgr() {}
+        ~CirMgr()
+        {       for (int i = 0; i < _gateList.size(); ++i) delete _gateList[i];
+        }
 
         // Access functions
         // return '0' if "gid" corresponds to an undefined gate.
@@ -79,6 +81,10 @@ class CirMgr
         list<FECGroup>       _fecGrps;
         // Private member of optimize
         void replaceGate(CirGate*, CirGate*, const bool&);
+
+        //Private member of simluation
+        void simValue(const size_t* &init, list<FECGroup> &fecGrps, HashMap<SimValue, FECGroup> &newFecGrps);
+        
 };
 
 #endif // CIR_MGR_H

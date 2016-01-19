@@ -10,6 +10,7 @@
 #define CIR_DEF_H
 
 #include <vector>
+#include <list>
 #include "myHashMap.h"
 
 using namespace std;
@@ -54,6 +55,7 @@ class FECGroup
             public:
                 iterator() {}
                 iterator(std::list<size_t>::iterator i) { it = i; }
+                iterator(std::list<size_t>::const_iterator i) { it = i; }
 
                 CirGate* operator* () { return (CirGate*)(*it & ~(size_t)(0x1)); }
                 const CirGate* operator* () const { return (CirGate*)(*it & ~(size_t)(0x1)); }
@@ -69,22 +71,32 @@ class FECGroup
                 bool operator != (const iterator& i) const { return !(*this == i); }
 
             private:
-                list<size_t>::iterator it;
+                list<size_t>::const_iterator it;
         };
 
-        iterator begin()
+        iterator begin() const 
         {   return iterator( gate.begin() ); }
 
-        iterator end()
+        iterator end() const
         {    return iterator(gate.end());  }
 
-        size_t size() { return gate.size(); }
+        size_t size() const { return gate.size(); }
 
         FECGroup& addGate(const CirGate* g, const bool &inv)
-        {     cout << "Somebody inside" << endl;
-              gate.push_back((size_t)(g) | (size_t)inv);
+        {      gate.push_back((size_t)(g) | (size_t)inv);
               return(*this);
         }
+};
+
+class SimValue
+{
+    public:
+        SimValue(size_t data = 0): _data(data) {}
+        size_t operator() () const { return _data; }
+        bool operator == (const SimValue& v) const { return (_data == v._data); }
+
+    private:
+        size_t _data;
 };
 
 #endif // CIR_DEF_H

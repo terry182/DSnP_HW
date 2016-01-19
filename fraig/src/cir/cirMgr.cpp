@@ -660,9 +660,16 @@ CirMgr::printFloatGates() const
 }
 void CirMgr::printFECPairs() const
 {
-    for (int i = 0; i < _gateList.size(); ++i)
-        if(_gateList[i])
-            cout << _gateList[i]->getTypeStr() << "(" << i << ")\n";
+    const list<FECGroup> &fecGrps = _fecGrps;
+    int i = 0;
+    for (list<FECGroup>::const_iterator it = fecGrps.begin(); it != fecGrps.end(); it++, i++)
+    {     cout << "[" << i  << "] ";
+          for (FECGroup::iterator itt = (*it).begin(); itt != (*it).end(); ++itt)
+              cout << (itt.getInverse() ? "!" : "") << (*itt)->getId() << " ";
+
+              cout << "Size :" << (*it).size();
+          cout << endl;
+    }
 }
 
 void
