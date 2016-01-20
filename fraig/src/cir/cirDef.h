@@ -44,6 +44,8 @@ enum GateType
 // FECGroup Class for simulation
 class FECGroup
 {
+    friend class CirMgr;
+
     private:
         list<size_t> gate;
 
@@ -77,7 +79,7 @@ class FECGroup
                 list<size_t>::const_iterator it;
         };
 
-        iterator begin() const 
+        iterator begin() const
         {   return iterator( gate.begin() ); }
 
         iterator end() const

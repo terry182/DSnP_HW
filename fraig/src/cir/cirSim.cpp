@@ -40,6 +40,10 @@ static inline unsigned Log2(size_t n)
     return ans;
 }
 
+static bool cmpID(size_t a, size_t b)
+{    return (((CirGate*)(a & ~(size_t)0x1))->getId() < ((CirGate*)(b & ~(size_t)0x1))->getId());
+}
+
 /************************************************/
 /*   Public member functions about Simulation   */
 /************************************************/
@@ -65,7 +69,7 @@ void CirMgr::randomSim()
         {   CirGate* ptr[2] = {(CirGate*)(_dfsList[j]->_fanin[0] & ~(size_t)0x1), (CirGate*)(_dfsList[j]->_fanin[1] & ~(size_t)0x1)};
 
             _dfsList[j]->_simValue = ~(size_t)(0x0);
-
+            _dfsList[j]->_grp = 0;
             // Value = 0 if UNDEF_GATE
             if (ptr[0]->getType() == UNDEF_GATE) ptr[0]->_simValue = 0;
             if (ptr[1]->getType() == UNDEF_GATE) ptr[1]->_simValue = 0;
@@ -91,7 +95,22 @@ void CirMgr::randomSim()
         }
     }
     cnt += 64;
+    if (_simLog)
+    {     size_t I[_piList.size()], O[_piList.size()];
+            for (int j = 0; j < _piList.size(); ++j)
+                I[j] = _piList[j]->_simValue;
+            for (int j = 0; j < _poList.size(); ++j)
+                O[j] = _poList[j]->_simValue;
 
+          for (int i = 0; i < 64; i++)
+          {     for (int j = 0; j < _piList.size(); I[j++] >>= 1)
+                     *_simLog << (I[j] & 1);
+                cout << " ";
+                for (int j = 0; j < _poList.size(); O[j++] >>= 1)
+                        *_simLog << (O[j] & 1);
+                cout << endl;
+          }
+    }
     //CollectValidFecGrp
     for (HashMap<SimValue, FECGroup>::iterator it = newFecGrps.begin(); it != newFecGrps.end(); it++)
         if ((*it).second.size() > 1) // Single Dog is not needed.
@@ -129,6 +148,22 @@ void CirMgr::randomSim()
             else if (_dfsList[j]->getType() == CONST_GATE) _dfsList[j]->_simValue = 0;
             else continue;
         }
+        if (_simLog)
+        {     size_t I[_piList.size()], O[_piList.size()];
+                for (int j = 0; j < _piList.size(); ++j)
+                    I[j] = _piList[j]->_simValue;
+                for (int j = 0; j < _poList.size(); ++j)
+                    O[j] = _poList[j]->_simValue;
+
+              for (int i = 0; i < 64; i++)
+              {     for (int j = 0; j < _piList.size(); I[j++] >>= 1)
+                         *_simLog << (I[j] & 1);
+                    cout << " ";
+                    for (int j = 0; j < _poList.size(); O[j++] >>= 1)
+                            *_simLog << (O[j] & 1);
+                    cout << endl;
+              }
+        }
         size_t t = fecGrps.size(), n = 0;
         for (list<FECGroup>::iterator it = fecGrps.begin(); it != fecGrps.end() && n < t; n++)// for_each(fecGrp, fecGrps):
         {   FECGroup fecGrp = *it;
@@ -155,7 +190,15 @@ void CirMgr::randomSim()
         if(fecGrps.size() == t) ++failCnt;
         cnt += 64;
     }
-    cout << "cnt = " << cnt << endl;
+
+    // Build CirGate thing.
+    for (list<FECGroup>::iterator it = fecGrps.begin(); it != fecGrps.end(); it++)
+    {     FECGroup* fecGrp = &(*it);
+          fecGrp->gate.sort(cmpID); // sort by ID
+          for (FECGroup::iterator i = fecGrp->begin(); i != fecGrp->end(); ++i)
+                (*i)->_grp = (size_t)fecGrp | (size_t)i.getInverse();
+    }
+    cout << cnt << " patterns simlated." << endl;
 }
 
 void CirMgr::fileSim(ifstream& patternFile)
@@ -191,6 +234,14 @@ void CirMgr::fileSim(ifstream& patternFile)
 
     if (cnt % 64)  simulate(&(p[0]), fecGrps, newFecGrps);
 
+    // Build CirGate thing.
+    for (list<FECGroup>::iterator it = fecGrps.begin(); it != fecGrps.end(); it++)
+    {     FECGroup* fecGrp = &(*it);
+            fecGrp->gate.sort(cmpID);   // Sort ID
+          for (FECGroup::iterator i = fecGrp->begin(); i != fecGrp->end(); ++i)
+                (*i)->_grp = (size_t)fecGrp | (size_t)i.getInverse();
+    }
+
     cout << "Total # of FEC Groups:" << fecGrps.size() << endl;
     cout << cnt << " pattern simulated"<< endl;
 
@@ -210,11 +261,12 @@ void CirMgr::simFirstTime(size_t* const &init, list<FECGroup> &fecGrps, HashMap<
 
     for (unsigned j = 0, m = _dfsList.size(); j < m; ++j)
     {   if (init == 0 && _dfsList[j]->getType() == PI_GATE) // Need to random.
-        _dfsList[j]->_simValue = (((size_t)(rnGen(INT_MAX))) << 32) | (rnGen(INT_MAX));
+            _dfsList[j]->_simValue = (((size_t)(rnGen(INT_MAX))) << 32) | (rnGen(INT_MAX));
         else if (_dfsList[j]->getType() == AIG_GATE)
         {   CirGate* ptr[2] = {(CirGate*)(_dfsList[j]->_fanin[0] & ~(size_t)0x1), (CirGate*)(_dfsList[j]->_fanin[1] & ~(size_t)0x1)};
 
             _dfsList[j]->_simValue = ~(size_t)(0x0);
+            _dfsList[j]->_grp = 0;
 
             // Value = 0 if UNDEF_GATE
             if (ptr[0]->getType() == UNDEF_GATE) ptr[0]->_simValue = 0;
@@ -238,6 +290,23 @@ void CirMgr::simFirstTime(size_t* const &init, list<FECGroup> &fecGrps, HashMap<
             newGrp.addGate(_dfsList[j], 0);
             newFecGrps.forceInsert(SimValue(_dfsList[j]->_simValue), newGrp);
         }
+    }
+
+    if (_simLog)
+    {     size_t I[_piList.size()], O[_piList.size()];
+            for (int j = 0; j < _piList.size(); ++j)
+                I[j] = _piList[j]->_simValue;
+            for (int j = 0; j < _poList.size(); ++j)
+                O[j] = _poList[j]->_simValue;
+
+          for (int i = 0; i < 64; i++)
+          {     for (int j = 0; j < _piList.size(); I[j++] >>= 1)
+                     *_simLog << (I[j] & 1);
+                cout << " ";
+                for (int j = 0; j < _poList.size(); O[j++] >>= 1)
+                        *_simLog << (O[j] & 1);
+                cout << endl;
+          }
     }
     //Collect Valid FecGrp
     for (HashMap<SimValue, FECGroup>::iterator it = newFecGrps.begin(); it != newFecGrps.end(); it++)
@@ -272,6 +341,22 @@ void CirMgr::simulate(size_t* const &init, list<FECGroup> &fecGrps, HashMap<SimV
         }
         else if (_dfsList[j]->getType() == CONST_GATE) _dfsList[j]->_simValue = 0;
         else continue;
+    }
+    if (_simLog)
+    {     size_t I[_piList.size()], O[_piList.size()];
+            for (int j = 0; j < _piList.size(); ++j)
+                I[j] = _piList[j]->_simValue;
+            for (int j = 0; j < _poList.size(); ++j)
+                O[j] = _poList[j]->_simValue;
+
+          for (int i = 0; i < 64; i++)
+          {     for (int j = 0; j < _piList.size(); I[j++] >>= 1)
+                     *_simLog << (I[j] & 1);
+                cout << " ";
+                for (int j = 0; j < _poList.size(); O[j++] >>= 1)
+                        *_simLog << (O[j] & 1);
+                cout << endl;
+          }
     }
 
     size_t t = fecGrps.size(), i = 0;

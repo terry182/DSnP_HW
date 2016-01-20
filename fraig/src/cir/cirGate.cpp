@@ -97,8 +97,18 @@ CirGate::reportGate() const
     getline(s, p);
     cout << "==================================================" << endl;
     cout << setw(49) << left << p << "="<< endl;
-    //TODO: Fix here
-    cout << "= FECs:                                          =" << endl;
+    s << "= FECs:";
+    if (_grp)
+    {   FECGroup* fecGrp = (FECGroup*)(_grp & ~(size_t)(0x1));
+        bool inv = _grp & 1;
+        for (FECGroup::iterator it = fecGrp->begin(); it != fecGrp->end(); ++it)
+            if ((*it) != this)
+                  s << ((it.getInverse()^inv) ? "!": "" ) << (*it)->getId() << " ";
+    }
+        s << endl;
+        getline(s, p);
+        cout << setw(49) << left << p << "="<< endl;
+
 
     s << "= Value: ";
     size_t v = _simValue;

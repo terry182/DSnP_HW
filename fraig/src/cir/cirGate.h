@@ -34,7 +34,7 @@ class CirGate
 
     public:
         CirGate() {}
-        CirGate(int id = 0, int lineNum = 0): _id(id), _lineNum(lineNum), _simValue(0){}
+        CirGate(int id = 0, int lineNum = 0): _id(id), _lineNum(lineNum), _simValue(0), _grp(0){}
         virtual ~CirGate() {}
 
         // Basic access methods
@@ -45,6 +45,7 @@ class CirGate
         virtual GateType getType() const  { return UNDEF_GATE; }
         void setVar(const Var &v) { _satVar = v;}
         Var getVar() { return _satVar; }
+        unsigned getDFSId() const { return _dfsid;}
 
         // Printing functions
         virtual void printGate() const {}
@@ -60,10 +61,12 @@ class CirGate
     private:
         int _id;
         int _lineNum;
+        int _dfsid;
         vector<size_t> _fanin;
         vector<size_t> _fanout;
         size_t _simValue;
         Var _satVar;
+        size_t  _grp;
 };
 
 class ConstGate: public CirGate
