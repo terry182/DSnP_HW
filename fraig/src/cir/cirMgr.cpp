@@ -667,7 +667,7 @@ void CirMgr::printFECPairs() const
           for (FECGroup::iterator itt = (*it).begin(); itt != (*it).end(); ++itt)
               cout << (itt.getInverse() ? "!" : "") << (*itt)->getId() << " ";
 
-              cout << "Size :" << (*it).size();
+      //        cout << "Size :" << (*it).size();
           cout << endl;
     }
 }
@@ -700,6 +700,7 @@ CirMgr::writeAag(ostream& outfile) const
             outfile << endl;
         }
 
+    /*
     for (int i = 0; i < _piList.size(); ++i)
     {   if (_piList[i]->_name != "")
             outfile << "i" << i << " " << _piList[i]->_name << endl;
@@ -713,6 +714,7 @@ CirMgr::writeAag(ostream& outfile) const
         for (int i = 0; i < _comments.size(); ++i)
             outfile << _comments[i] << endl;
     }
+    */
 
 }
 

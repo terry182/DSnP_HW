@@ -85,6 +85,11 @@ class CirMgr
         //Private member of simluation
         void simulate(size_t* const &init, list<FECGroup> &fecGrps, HashMap<SimValue, FECGroup> &newFecGrps);
         void simFirstTime(size_t* const &init, list<FECGroup> &fecGrps, HashMap<SimValue, FECGroup> &newFecGrps);
+        
+        
+        // Private member for fraig
+        void genProofModel(SatSolver& s);
+        void splitGroupbySat(FECGroup::iterator &it, FECGroup &curGrp, SatSolver &s);
 
 
 };

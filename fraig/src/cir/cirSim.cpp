@@ -47,13 +47,14 @@ void CirMgr::randomSim()
 {   //TODO: Change from Const Number Simulation to Size Dependent
     list<FECGroup> &fecGrps = _fecGrps;
 
-    unsigned failCnt = 0, maxFail = Log2(_params[4]); // Magic Numberrrrrr
+    unsigned failCnt = 0, maxFail = Log2(_params[2]) +Log2(_params[4]); // Magic Numberrrrrr
     unsigned cnt = 0;
     cout << "MAX_FAILS = " << maxFail << endl;
 
 
     HashMap<SimValue, FECGroup> newFecGrps(_dfsList.size());
 
+    newFecGrps.forceInsert(SimValue(0), FECGroup(_gateList[0]));
     // First time of random
     for (unsigned j = 0, m = _dfsList.size(); j < m; ++j)
     {   if (_dfsList[j]->getType() == PI_GATE)  // Give it a input
@@ -183,8 +184,8 @@ void CirMgr::fileSim(ifstream& patternFile)
             else p[i] = (p[i] << 1) | (s[i] - '0');
         }
         if (++cnt % 64 == 0)
-        { if (cnt == 64) simFirstTime(&p[0], fecGrps, newFecGrps);
-          else simulate(&(p[0]), fecGrps, newFecGrps);  // Already stored 64 pattern
+        {   if (cnt == 64)  simFirstTime(&p[0], fecGrps, newFecGrps);
+            else simulate(&(p[0]), fecGrps, newFecGrps);  // Already stored 64 pattern
         }
     }
 
@@ -203,40 +204,41 @@ void CirMgr::fileSim(ifstream& patternFile)
 // Init = 0  => Random Input
 void CirMgr::simFirstTime(size_t* const &init, list<FECGroup> &fecGrps, HashMap<SimValue, FECGroup> &newFecGrps)
 {
-  if (init) for (int i = 0; i < _params[1]; ++i) _piList[i]->_simValue = init[i];
+    if (init) for (int i = 0; i < _params[1]; ++i) _piList[i]->_simValue = init[i];
 
+    newFecGrps.forceInsert(SimValue(0), FECGroup(_gateList[0]));
 
-  for (unsigned j = 0, m = _dfsList.size(); j < m; ++j)
-  {   if (init == 0 && _dfsList[j]->getType() == PI_GATE) // Need to random.
-            _dfsList[j]->_simValue = (((size_t)(rnGen(INT_MAX))) << 32) | (rnGen(INT_MAX));
-      else if (_dfsList[j]->getType() == AIG_GATE)
-      {   CirGate* ptr[2] = {(CirGate*)(_dfsList[j]->_fanin[0] & ~(size_t)0x1), (CirGate*)(_dfsList[j]->_fanin[1] & ~(size_t)0x1)};
+    for (unsigned j = 0, m = _dfsList.size(); j < m; ++j)
+    {   if (init == 0 && _dfsList[j]->getType() == PI_GATE) // Need to random.
+        _dfsList[j]->_simValue = (((size_t)(rnGen(INT_MAX))) << 32) | (rnGen(INT_MAX));
+        else if (_dfsList[j]->getType() == AIG_GATE)
+        {   CirGate* ptr[2] = {(CirGate*)(_dfsList[j]->_fanin[0] & ~(size_t)0x1), (CirGate*)(_dfsList[j]->_fanin[1] & ~(size_t)0x1)};
 
-          _dfsList[j]->_simValue = ~(size_t)(0x0);
+            _dfsList[j]->_simValue = ~(size_t)(0x0);
 
-          // Value = 0 if UNDEF_GATE
-          if (ptr[0]->getType() == UNDEF_GATE) ptr[0]->_simValue = 0;
-          if (ptr[1]->getType() == UNDEF_GATE) ptr[1]->_simValue = 0;
+            // Value = 0 if UNDEF_GATE
+            if (ptr[0]->getType() == UNDEF_GATE) ptr[0]->_simValue = 0;
+            if (ptr[1]->getType() == UNDEF_GATE) ptr[1]->_simValue = 0;
 
-          // Get Value
-          for (int k = 0; k < 2; ++k)
-              if (_dfsList[j]->_fanin[k] & 1) _dfsList[j]->_simValue &= ~(ptr[k]->_simValue);
-              else _dfsList[j]->_simValue &= ptr[k]->_simValue;
-      }
-      else if (_dfsList[j]->getType() == CONST_GATE) _dfsList[j]->_simValue = 0;
-      else continue;
+            // Get Value
+            for (int k = 0; k < 2; ++k)
+                if (_dfsList[j]->_fanin[k] & 1) _dfsList[j]->_simValue &= ~(ptr[k]->_simValue);
+                else _dfsList[j]->_simValue &= ptr[k]->_simValue;
+        }
+        else if (_dfsList[j]->getType() == CONST_GATE) _dfsList[j]->_simValue = 0;
+        else continue;
 
-          FECGroup* grp = 0;
-          if (newFecGrps.check(SimValue(_dfsList[j]->_simValue), grp)) // Equivalent
-              grp->addGate(_dfsList[j], 0);
-          else if (newFecGrps.check(SimValue(~(_dfsList[j]->_simValue)), grp)) // Inverse Equivalent
-              grp->addGate(_dfsList[j], 1);
-          else
-          {   FECGroup newGrp;
-              newGrp.addGate(_dfsList[j], 0);
-              newFecGrps.forceInsert(SimValue(_dfsList[j]->_simValue), newGrp);
-          }
-  }
+        FECGroup* grp = 0;
+        if (newFecGrps.check(SimValue(_dfsList[j]->_simValue), grp)) // Equivalent
+            grp->addGate(_dfsList[j], 0);
+        else if (newFecGrps.check(SimValue(~(_dfsList[j]->_simValue)), grp)) // Inverse Equivalent
+            grp->addGate(_dfsList[j], 1);
+        else
+        {   FECGroup newGrp;
+            newGrp.addGate(_dfsList[j], 0);
+            newFecGrps.forceInsert(SimValue(_dfsList[j]->_simValue), newGrp);
+        }
+    }
     //Collect Valid FecGrp
     for (HashMap<SimValue, FECGroup>::iterator it = newFecGrps.begin(); it != newFecGrps.end(); it++)
         if ((*it).second.size() > 1) // Single Dog is not needed.
@@ -247,7 +249,7 @@ void CirMgr::simFirstTime(size_t* const &init, list<FECGroup> &fecGrps, HashMap<
 
 void CirMgr::simulate(size_t* const &init, list<FECGroup> &fecGrps, HashMap<SimValue, FECGroup> &newFecGrps)
 {
-  //  cout << "Total # of FECGroups: " <<  fecGrps.size() << endl;
+    //  cout << "Total # of FECGroups: " <<  fecGrps.size() << endl;
     if (init) for (int i = 0; i < _params[1]; ++i) _piList[i]->_simValue = init[i];
 
 
@@ -272,29 +274,29 @@ void CirMgr::simulate(size_t* const &init, list<FECGroup> &fecGrps, HashMap<SimV
         else continue;
     }
 
-        size_t t = fecGrps.size(), i = 0;
-        for (list<FECGroup>::iterator it = fecGrps.begin(); it != fecGrps.end() && i < t; i++)// for_each(fecGrp, fecGrps):
-        {   FECGroup fecGrp = *it;
-            newFecGrps.init(fecGrp.size());
-            for(FECGroup::iterator i = fecGrp.begin(); i != fecGrp.end(); ++i)
-            {   FECGroup* grp;
-                if (newFecGrps.check(SimValue((*i)->_simValue), grp)) // Equivalent
-                    grp->addGate(*i, 0);
-                else if (newFecGrps.check(SimValue(~((*i)->_simValue)), grp)) // Inverse Equivalent
-                    grp->addGate(*i, 1);
-                else
-                {   FECGroup newGrp;
-                    newGrp.addGate(*i, 0);
-                    newFecGrps.forceInsert(SimValue((*i)->_simValue), newGrp);
-                }
+    size_t t = fecGrps.size(), i = 0;
+    for (list<FECGroup>::iterator it = fecGrps.begin(); it != fecGrps.end() && i < t; i++)// for_each(fecGrp, fecGrps):
+    {   FECGroup fecGrp = *it;
+        newFecGrps.init(fecGrp.size());
+        for(FECGroup::iterator i = fecGrp.begin(); i != fecGrp.end(); ++i)
+        {   FECGroup* grp;
+            if (newFecGrps.check(SimValue((*i)->_simValue), grp)) // Equivalent
+                grp->addGate(*i, 0);
+            else if (newFecGrps.check(SimValue(~((*i)->_simValue)), grp)) // Inverse Equivalent
+                grp->addGate(*i, 1);
+            else
+            {   FECGroup newGrp;
+                newGrp.addGate(*i, 0);
+                newFecGrps.forceInsert(SimValue((*i)->_simValue), newGrp);
             }
-            //Delete the group first.
-            it = fecGrps.erase(it);
-            //Collect Valid FecGrp
-            for (HashMap<SimValue, FECGroup>::iterator it = newFecGrps.begin(); it != newFecGrps.end(); it++)
-                if ((*it).second.size() > 1) // Single Dog is not needed.
-                    fecGrps.push_back((*it).second);
         }
+        //Delete the group first.
+        it = fecGrps.erase(it);
+        //Collect Valid FecGrp
+        for (HashMap<SimValue, FECGroup>::iterator it = newFecGrps.begin(); it != newFecGrps.end(); it++)
+            if ((*it).second.size() > 1) // Single Dog is not needed.
+                fecGrps.push_back((*it).second);
+    }
 
 
 }

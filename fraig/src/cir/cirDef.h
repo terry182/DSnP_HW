@@ -49,9 +49,12 @@ class FECGroup
 
     public:
         FECGroup(){}
+        FECGroup(CirGate* g) { gate.push_back((size_t)g); }
 
         class iterator
         {
+            friend class FECGroup;
+
             public:
                 iterator() {}
                 iterator(std::list<size_t>::iterator i) { it = i; }
@@ -81,6 +84,10 @@ class FECGroup
         {    return iterator(gate.end());  }
 
         size_t size() const { return gate.size(); }
+
+        iterator erase(iterator &i) { i.it = gate.erase(i.it); return i; }
+
+        void clear() { gate.clear(); }
 
         FECGroup& addGate(const CirGate* g, const bool &inv)
         {      gate.push_back((size_t)(g) | (size_t)inv);

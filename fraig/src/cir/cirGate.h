@@ -43,6 +43,8 @@ class CirGate
         unsigned getId() const { return _id; }
         virtual bool isAig() const { return false; }
         virtual GateType getType() const  { return UNDEF_GATE; }
+        void setVar(const Var &v) { _satVar = v;}
+        Var getVar() { return _satVar; }
 
         // Printing functions
         virtual void printGate() const {}
@@ -61,6 +63,7 @@ class CirGate
         vector<size_t> _fanin;
         vector<size_t> _fanout;
         size_t _simValue;
+        Var _satVar;
 };
 
 class ConstGate: public CirGate
