@@ -45,7 +45,7 @@ class CirGate
         virtual GateType getType() const  { return UNDEF_GATE; }
         void setVar(const Var &v) { _satVar = v;}
         Var getVar() { return _satVar; }
-        unsigned getDFSId() const { return _dfsid;}
+        FECGroup* getGrp() const { return (FECGroup*)(_grp & ~(size_t)(0x1)); }
 
         // Printing functions
         virtual void printGate() const {}
@@ -57,15 +57,28 @@ class CirGate
         void netflow(bool[], vector<CirGate*>&, bool checkDel = false) const;
         void faninFlow(int depth, int &level, bool neg, set<int> &set) const;
         void fanoutFlow(int depth, int &level, bool neg, set<int> &set) const;
+        void outputFlow(list<int>& ans, int params[]) const
+        {     for (list<int>::iterator it  = ans.begin(); it != ans.end(); ++it)
+                  if (*it == _id) return ;
+
+              for (int i = 0; i < _fanin.size(); ++i)
+                  if (((CirGate*)(_fanin[i] & ~(size_t)(0x1)))->getType() == UNDEF_GATE)
+                      continue;
+                  else
+                      ((CirGate*)(_fanin[i] & ~(size_t)(0x1)))->outputFlow(ans, params);
+
+              if (getType() == AIG_GATE) {  params[0] = std::max(_id, params[0]); ans.push_back(_id); ++params[4]; }
+              else if (getType() == PI_GATE) { params[0] = std::max(_id, params[0]); ans.push_front(_id); ++params[1]; }
+        }
 
     private:
         int _id;
         int _lineNum;
-        int _dfsid;
         vector<size_t> _fanin;
         vector<size_t> _fanout;
         size_t _simValue;
         Var _satVar;
+
         size_t  _grp;
 };
 

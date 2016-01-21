@@ -75,13 +75,13 @@ void CirMgr::optimize()
                CirGate* ptr[2] = {(CirGate*)(ls[0] & ~(size_t)0x1), (CirGate*)(ls[1] & ~(size_t)0x1)};
 
                if (ls[0] == ls[1])   // A and A = A
-                    replaceGate(_dfsList[i], ptr[0], ls[0]&1); // replace _dfsList[i] with _dfsList[i]->_fanin
+                    replaceGate(_dfsList[i], ptr[0], ls[0]&1, "Simplifying: "); // replace _dfsList[i] with _dfsList[i]->_fanin
                else if (ptr[0] == ptr[1])   // A and Not A = 0
-                     replaceGate(_dfsList[i], _gateList[0], 0);// replace _dfsList[i] with const 0
+                     replaceGate(_dfsList[i], _gateList[0], 0, "Simplifying: ");// replace _dfsList[i] with const 0
                else if (ls[0] == (size_t)_gateList[0] || ls[1] == (size_t)_gateList[0]) // O and A = 0
-                     replaceGate(_dfsList[i], _gateList[0], 0); // same as above
+                     replaceGate(_dfsList[i], _gateList[0], 0, "Simplifying: "); // same as above
                 else if (ptr[0] == _gateList[0] || ptr[1] == _gateList[0]) // 1 and A = A
-                    replaceGate(_dfsList[i], ptr[(ptr[0] == _gateList[0])], ls[(ptr[0] == _gateList[0])]&1);
+                    replaceGate(_dfsList[i], ptr[(ptr[0] == _gateList[0])], ls[(ptr[0] == _gateList[0])]&1, "Simplifying: ");
                 else continue;    // This is fucking IMPORTANT
 
                   //          cout << "fuck" << endl;
@@ -97,8 +97,8 @@ void CirMgr::optimize()
 /***************************************************/
 /*   Private member functions about optimization   */
 /***************************************************/
-void CirMgr::replaceGate(CirGate* ori, CirGate* tar, const bool& inverse)
-{   cout << "Simplifying: " << tar->getId() << " merging " << (inverse ? "!" : "") << ori->getId() << "..." <<  endl;
+void CirMgr::replaceGate(CirGate* ori, CirGate* tar, const bool& inverse, const string &con)
+{   cout << con << tar->getId() << " merging " << (inverse ? "!" : "") << ori->getId() << "..." <<  endl;
 
     // Fanout's Fanin
     for (size_t i = 0; i < ori->_fanout.size(); i++)
@@ -123,8 +123,8 @@ void CirMgr::replaceGate(CirGate* ori, CirGate* tar, const bool& inverse)
         }
         if (ptr[k]->getType() == UNDEF_GATE && ptr[k]->_fanout.empty())
         {
-                cout << "Simplifying: " << ptr[k]->getId() << " removed..." <<  endl;
-
+                cout << con << ptr[k]->getId() << " removed..." <<  endl;
+                --_params[4];
                 _gateList[ptr[k]->getId()] = 0; // Remove this gate
                 delete ptr[k];
         }

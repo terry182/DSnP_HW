@@ -51,7 +51,7 @@ void CirMgr::randomSim()
 {   //TODO: Change from Const Number Simulation to Size Dependent
     list<FECGroup> &fecGrps = _fecGrps;
 
-    unsigned failCnt = 0, maxFail = Log2(_params[2]) +Log2(_params[4]); // Magic Numberrrrrr
+    unsigned failCnt = 0, maxFail = Log2(_params[1]+_params[4]); // Magic Numberrrrrr
     unsigned cnt = 0;
     cout << "MAX_FAILS = " << maxFail << endl;
 
@@ -196,7 +196,7 @@ void CirMgr::randomSim()
     {     FECGroup* fecGrp = &(*it);
           fecGrp->gate.sort(cmpID); // sort by ID
           for (FECGroup::iterator i = fecGrp->begin(); i != fecGrp->end(); ++i)
-                (*i)->_grp = (size_t)fecGrp | (size_t)i.getInverse();
+                  (*i)->_grp = (size_t)fecGrp | (size_t)i.getInverse();
     }
     cout << cnt << " patterns simlated." << endl;
 }
@@ -238,8 +238,10 @@ void CirMgr::fileSim(ifstream& patternFile)
     for (list<FECGroup>::iterator it = fecGrps.begin(); it != fecGrps.end(); it++)
     {     FECGroup* fecGrp = &(*it);
             fecGrp->gate.sort(cmpID);   // Sort ID
+
           for (FECGroup::iterator i = fecGrp->begin(); i != fecGrp->end(); ++i)
                 (*i)->_grp = (size_t)fecGrp | (size_t)i.getInverse();
+
     }
 
     cout << "Total # of FEC Groups:" << fecGrps.size() << endl;

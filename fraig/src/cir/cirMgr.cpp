@@ -720,5 +720,27 @@ CirMgr::writeAag(ostream& outfile) const
 
 void
 CirMgr::writeGate(ostream& outfile, CirGate *g) const
-{
+{   std::list<int> v;
+    int params[5] = {0, 0, 0, 1, 0};
+    g->outputFlow(v, params);
+
+    outfile << "aag";
+    for (int i = 0; i < 5; ++i)
+        outfile << " " << params[i];
+    outfile << endl;
+    list<int>::iterator it;
+    for (it = v.begin(); it != v.end(); it++)
+    {    if (getGate(*it)->getType() == PI_GATE)
+              outfile << (*it)*2 << endl;
+         else break;
+    }
+    outfile << g->getId()*2 << endl;
+    for (; it != v.end(); it++)
+    if (getGate(*it)->getType() == AIG_GATE)
+    {     outfile << (*it)*2;
+          for(int i = 0; i < getGate(*it)->_fanin.size(); ++i)
+              outfile << " " << ((CirGate*)(getGate(*it)->_fanin[i] & ~(size_t)(0x1)))->getId()*2 + (getGate(*it)->_fanin[i] & 1);
+          outfile << endl;
+    }
+
 }

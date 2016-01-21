@@ -4,7 +4,7 @@
   Synopsis     [ Define cir FRAIG functions ]
   Author       [ Chung-Yang (Ric) Huang ]
   Copyright    [ Copyleft(c) 2012-present LaDs(III), GIEE, NTU, Taiwan ]
-****************************************************************************/
+ ****************************************************************************/
 
 #include <cassert>
 #include "cirMgr.h"
@@ -25,97 +25,82 @@ using namespace std;
 /**************************************/
 /*   Static varaibles and functions   */
 /**************************************/
-
-static bool cmpByDFSId(const FECGroup &a, const FECGroup &b)
-{     return ((*a.begin())->getDFSId(), (*b.begin())->getDFSId());
-}
-
 /*******************************************/
 /*   Public member functions about fraig   */
 /*******************************************/
 // _floatList may be changed.
 // _unusedList and _undefList won't be changed
-void
-CirMgr::strash()
+void CirMgr::strash()
 {   HashMap<HashKey, CirGate*> hash(_dfsList.size()*2);
     for (unsigned i = 0, n = _dfsList.size(); i < n; i++)
-      if (_dfsList[i]->getType() == AIG_GATE) // Only Merge AIG_GATE
-      {    HashKey k(_dfsList[i]);
-           CirGate* mergeGate; // Gate that need to be merged.
-           if (hash.check(k, mergeGate))
-           {    replaceGate(_dfsList[i], mergeGate, 0);
+        if (_dfsList[i]->getType() == AIG_GATE) // Only Merge AIG_GATE
+        {    HashKey k(_dfsList[i]);
+            CirGate* mergeGate; // Gate that need to be merged.
+            if (hash.check(k, mergeGate))
+            {    replaceGate(_dfsList[i], mergeGate, 0, "Strashing: ");
 
                 _params[4]--;
                 _gateList[_dfsList[i]->getId()] = 0;
                 delete _dfsList[i];
-           }
-           else hash.forceInsert(k, _dfsList[i]);
-      }
+            }
+            else hash.forceInsert(k, _dfsList[i]);
+        }
     buildDFSList();
 }
 
-void
-CirMgr::fraig()
-{   SatSolver solver;
+void CirMgr::fraig()
+{  SatSolver solver;
     solver.initialize();
 
     genProofModel(solver);
 
-  //  cerr << "Generate Proof Model Successful." << endl;
+    //  cerr << "Generate Proof Model Successful." << endl;
 
     Var newV; // Variable for XOR Vars
     bool result;
-    int PackCnt = 0;
-    size_t p[_params[1]];
-    memset(p, 0, sizeof(p));
-
-    for (int i = 0; i < _dfsList.size(); ++i) _dfsList[i]->_dfsid = i;
-
-    _fecGrps.sort(cmpByDFSId);
-  //  cout << "FECGroups has" << _fecGrps.size() << endl;
+    //  cout << "FECGroups has" << _fecGrps.size() << endl;
     for (list<FECGroup>::iterator it = _fecGrps.begin(); it != _fecGrps.end(); ++it)
     {     FECGroup &fecGrp = *it;
-   //       cout << "Next grup." << cnt++ << endl;
-          FECGroup::iterator i = fecGrp.begin();
-          if (!(*(i))->getId()) // CONST 0 Group
-            {   i++;
-                for (; i != fecGrp.end(); ++i)
-               {
-                     solver.assumeRelease();
-                    //  cout << "操" << endl;
-                     solver.assumeProperty((*i)->getVar(), !i.getInverse());
-                     result = solver.assumpSolve();
-                     if (!result)  replaceGate(*i, _gateList[0], i.getInverse());
-                     else
-                     {   // Pack those inputs
-                      //   for (int i = 0; i < _params[1]; i++) p[i] = (p[i] << 1) + solver.getValue(_piList[i]->getVar());
-                      //   HashMap<SimValue, FECGroup> newFecGrps(_fecGrps.size());
-                      //   if (++PackCnt == 64) { PackCnt = 0; simulate(p, _fecGrps, newFecGrps); }
-                     }
-               }
-          }
-          else {
-          for (; i != fecGrp.end(); ++i)
-          {   FECGroup::iterator j = i;
-              for (++j; j != fecGrp.end();)
-              {   newV = solver.newVar();
-                  solver.assumeRelease();
-                  solver.addXorCNF(newV, (*i)->getVar(), i.getInverse(), (*j)->getVar(), j.getInverse());
-                  solver.assumeProperty(newV, true);
-                  result = solver.assumpSolve();
-                  if (!result)
-                  {  replaceGate(*j, *i, j.getInverse()^i.getInverse());
-                     j = fecGrp.erase(j);
-                  }
-                  else
-                  {  // cout << "SAT. Try to cut the group smaller" << endl;
-              //       for (int i = 0; i < _params[1]; i++) p[i] = (p[i] << 1) + solver.getValue(_piList[i]->getVar());
-            //         HashMap<SimValue, FECGroup> newFecGrps(_fecGrps.size());
-            //         if (++PackCnt == 64) { PackCnt = 0; simulate(p, _fecGrps, newFecGrps); }
-                      splitGroupbySat(j, fecGrp, solver);
-                  }
-              }
-          }
+        //       cout << "Next grup." << cnt++ << endl;
+        FECGroup::iterator i = fecGrp.begin();
+        if (!(*(i))->getId()) // CONST 0 Group
+        {   i++;
+            for (; i != fecGrp.end(); ++i)
+            {
+                solver.assumeRelease();
+                solver.assumeProperty((*i)->getVar(), !i.getInverse());
+                result = solver.assumpSolve();
+                if (!result)
+                { replaceGate(*i, _gateList[0], i.getInverse(), "Fraig: ");
+                    _gateList[(*i)->getId()] = 0;
+                    --_params[4];
+                    delete *i;
+                }
+            }
+        }
+        else
+        {
+            for (; i != fecGrp.end(); ++i)
+            {   FECGroup::iterator j = i;
+                for (++j; j != fecGrp.end();)
+                {   newV = solver.newVar();
+                    solver.assumeRelease();
+                    solver.addXorCNF(newV, (*i)->getVar(), i.getInverse(), (*j)->getVar(), j.getInverse());
+                    solver.assumeProperty(newV, true);
+                    result = solver.assumpSolve();
+                    if (!result)
+                    {  replaceGate(*j, *i, j.getInverse()^i.getInverse(), "Fraig: ");
+                        _gateList[(*j)->getId()] = 0;
+                        --_params[4];
+                        delete *j;
+                        j = fecGrp.erase(j);
+                    }
+                    else
+                    {  // cout << "SAT. Try to cut the group smaller" << endl;
+                        splitGroupbySat(j, fecGrp, solver);
+                    }
+                }
+            }
         }
     }
     buildDFSList();
@@ -128,25 +113,27 @@ CirMgr::fraig()
 /*   Private member functions about fraig   */
 /********************************************/
 void CirMgr::genProofModel(SatSolver& s)
-{  for (int i = 0; i < _dfsList.size(); ++i)
+{
+    s.initialize();
+
+    for (int i = 0; i < _dfsList.size(); ++i)
     {    Var v = s.newVar();
-         _dfsList[i]->setVar(v);
-         if (_dfsList[i]->getType() == AIG_GATE)
-         {     CirGate* ptr[2] = {(CirGate*)(_dfsList[i]->_fanin[0] & ~(size_t)0x1), (CirGate*)(_dfsList[i]->_fanin[1] & ~(size_t)0x1)};
-               if (ptr[0]->getType() == UNDEF_GATE || ptr[1]->getType() == UNDEF_GATE)
-                {      cerr << "Can't generate model for floating gate("<< _dfsList[i] << ")!!!" << endl;
-                        return ;
-                }
-               s.addAigCNF(v, ptr[0]->getVar(), (_dfsList[i]->_fanin[0] & 1), ptr[1]->getVar(), (_dfsList[i]->_fanin[1] & 1));
-         }
-         else if (_dfsList[i]->getType() == CONST_GATE)
-                s.assertProperty(v, false);
+        _dfsList[i]->setVar(v);
+        if (_dfsList[i]->getType() == AIG_GATE)
+        {     CirGate* ptr[2] = {(CirGate*)(_dfsList[i]->_fanin[0] & ~(size_t)0x1), (CirGate*)(_dfsList[i]->_fanin[1] & ~(size_t)0x1)};
+            if (ptr[0]->getType() == UNDEF_GATE || ptr[1]->getType() == UNDEF_GATE)
+            {      cerr << "Can't generate model for floating gate("<< _dfsList[i] << ")!!!" << endl;
+                return ;
+            }
+            s.addAigCNF(v, ptr[0]->getVar(), (_dfsList[i]->_fanin[0] & 1), ptr[1]->getVar(), (_dfsList[i]->_fanin[1] & 1));
+        }
+        else if (_dfsList[i]->getType() == CONST_GATE)
+            s.assertProperty(v, false);
     }
 }
 
 void CirMgr::splitGroupbySat(FECGroup::iterator &it, FECGroup &curGrp, SatSolver &s)
 {
-
     FECGroup newGrp;
     bool val = s.getValue((*it)->getVar()), flag = 0;
     FECGroup::iterator nextIt = curGrp.end();
@@ -155,13 +142,13 @@ void CirMgr::splitGroupbySat(FECGroup::iterator &it, FECGroup &curGrp, SatSolver
     for (it++; it != curGrp.end(); )
     {   bool v = s.getValue((*it)->getVar());
         if (it.getInverse()) v = !v;
-   //     cout << "hey" <<  endl;
+        //     cout << "hey" <<  endl;
         if (v == val)
         {   newGrp.addGate(*it, it.getInverse());
             it = curGrp.erase(it);
         }
         else { if(!flag) {nextIt = it; flag = 1;} it++;}
-     }
+    }
     it = nextIt;
     if (newGrp.size() > 1) _fecGrps.push_back(newGrp);
 }

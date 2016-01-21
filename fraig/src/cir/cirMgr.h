@@ -80,17 +80,16 @@ class CirMgr
 
         list<FECGroup>       _fecGrps;
         // Private member of optimize
-        void replaceGate(CirGate*, CirGate*, const bool&);
+        void replaceGate(CirGate*, CirGate*, const bool&, const string&);
 
         //Private member of simluation
         void simulate(size_t* const &init, list<FECGroup> &fecGrps, HashMap<SimValue, FECGroup> &newFecGrps);
         void simFirstTime(size_t* const &init, list<FECGroup> &fecGrps, HashMap<SimValue, FECGroup> &newFecGrps);
-        
-        
+
+
         // Private member for fraig
         void genProofModel(SatSolver& s);
         void splitGroupbySat(FECGroup::iterator &it, FECGroup &curGrp, SatSolver &s);
-
 
 };
 

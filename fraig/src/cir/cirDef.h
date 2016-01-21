@@ -56,6 +56,7 @@ class FECGroup
         class iterator
         {
             friend class FECGroup;
+            friend class CirMgr;
 
             public:
                 iterator() {}
