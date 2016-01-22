@@ -56,7 +56,7 @@ class CirMgr
 
         // Member functions about fraig
         void strash();
-        void printFEC() const;
+        void printFEC();
         void fraig();
 
         // Member functions about circuit reporting
@@ -65,7 +65,7 @@ class CirMgr
         void printPIs() const;
         void printPOs() const;
         void printFloatGates() const;
-        void printFECPairs() const;
+        void printFECPairs();
         void writeAag(ostream&) const;
         void writeGate(ostream&, CirGate*) const;
 

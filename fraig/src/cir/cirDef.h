@@ -61,7 +61,7 @@ class FECGroup
             public:
                 iterator() {}
                 iterator(std::list<size_t>::iterator i) { it = i; }
-                iterator(std::list<size_t>::const_iterator i) { it = i; }
+            //    iterator(std::list<size_t>::const_iterator i) { it = i; }
 
                 CirGate* operator* () { return (CirGate*)(*it & ~(size_t)(0x1)); }
                 const CirGate* operator* () const { return (CirGate*)(*it & ~(size_t)(0x1)); }
@@ -77,14 +77,14 @@ class FECGroup
                 bool operator != (const iterator& i) const { return !(*this == i); }
 
             private:
-                list<size_t>::const_iterator it;
+                list<size_t>::iterator it;
         };
 
-        iterator begin() const
-        {   return iterator( gate.begin() ); }
+        iterator begin() 
+        {    return iterator(gate.begin()); }
 
-        iterator end() const
-        {    return iterator(gate.end());  }
+        iterator end()
+        {   return iterator(gate.end());  }
 
         size_t size() const { return gate.size(); }
 
